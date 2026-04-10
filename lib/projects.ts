@@ -15,7 +15,7 @@ export const projects: Project[] = [
   {
     id: "tipperconnect",
     name: "TipperConnect",
-    role: "Founder & CEO · 2024–present",
+    role: "Co-Founder · 2024–present",
     headline:
       "The UK's first two-sided marketplace for construction waste haulage.",
     description:
