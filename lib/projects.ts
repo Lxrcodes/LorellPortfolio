@@ -20,7 +20,7 @@ export const projects: Project[] = [
       "The UK's first two-sided marketplace for construction waste haulage.",
     description:
       "Site managers book licensed tipper trucks. Quarries and contractors manage jobs and fleets. Built with Stripe Connect for split payments, the DEFRA Digital Waste Tracking API for compliance, and a founder-led go-to-market from cold call to signed contract.",
-    tags: ["Founder", "Next.js", "Stripe Connect", "DEFRA API", "B2B Marketplace"],
+    tags: ["Co-Founder", "Next.js", "Stripe Connect", "DEFRA API", "B2B Marketplace"],
     url: "https://tipperconnect.co.uk/",
     featured: true,
     image: "/images/projects/tipperconnect.png",
