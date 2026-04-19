@@ -44,6 +44,7 @@ export async function GET() {
         refresh_token: refreshToken,
         grant_type: "refresh_token",
       }),
+      cache: "no-store",
     });
 
     if (!tokenRes.ok) {
@@ -52,7 +53,10 @@ export async function GET() {
       throw new Error(`Failed to refresh Strava token: ${tokenRes.status}`);
     }
 
-    const { access_token }: TokenResponse = await tokenRes.json();
+    const tokenData = await tokenRes.json();
+    const access_token = tokenData.access_token;
+
+    console.log("Token refresh successful, fetching activities...");
 
     // Fetch this year's runs (paginated)
     const year = new Date().getFullYear();
@@ -65,11 +69,14 @@ export async function GET() {
         `https://www.strava.com/api/v3/athlete/activities?per_page=100&page=${page}&after=${after}`,
         {
           headers: { Authorization: `Bearer ${access_token}` },
+          cache: "no-store",
         }
       );
 
       if (!res.ok) {
-        throw new Error("Failed to fetch Strava activities");
+        const errorText = await res.text();
+        console.error("Strava activities fetch failed:", res.status, errorText);
+        throw new Error(`Failed to fetch Strava activities: ${res.status} - ${errorText}`);
       }
 
       const activities: StravaActivity[] = await res.json();
