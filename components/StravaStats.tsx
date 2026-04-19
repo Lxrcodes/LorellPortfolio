@@ -7,12 +7,10 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 interface StravaStatsProps {
   totalKm: number | null;
   totalRuns: number | null;
-  consecutiveWeeks: number | null;
   best5k: string;
   best10k: string;
   bestHalfMarathon: string;
   bestMarathon: string;
-  marathonGoal: string;
   loading?: boolean;
   error?: boolean;
 }
@@ -110,6 +108,8 @@ function StatCard({
   );
 }
 
+const LABEL_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
 // Cycling best efforts card with scramble animation
 function CyclingBestEffortCard({
   efforts,
@@ -122,7 +122,9 @@ function CyclingBestEffortCard({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [displayTime, setDisplayTime] = useState(efforts[0].time);
   const [displayLabel, setDisplayLabel] = useState(efforts[0].label);
+  const [displaySubtitle, setDisplaySubtitle] = useState(efforts[0].distance);
   const [isScrambling, setIsScrambling] = useState(false);
+  const [progress, setProgress] = useState(100);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -151,14 +153,33 @@ function CyclingBestEffortCard({
     return () => ctx.revert();
   }, [delay]);
 
+  // Progress bar countdown
+  useEffect(() => {
+    const duration = 3000;
+    const interval = 30;
+    const step = (interval / duration) * 100;
+
+    const timer = setInterval(() => {
+      setProgress((prev) => {
+        if (prev <= 0) return 100;
+        return prev - step;
+      });
+    }, interval);
+
+    return () => clearInterval(timer);
+  }, []);
+
   // Cycle through efforts with scramble effect
   useEffect(() => {
     const interval = setInterval(() => {
       setIsScrambling(true);
+      setProgress(100);
       const nextIndex = (currentIndex + 1) % efforts.length;
       const targetTime = efforts[nextIndex].time;
       const targetLabel = efforts[nextIndex].label;
+      const targetSubtitle = efforts[nextIndex].distance;
       let iteration = 0;
+      const maxIterations = Math.max(targetTime.length, targetLabel.length, targetSubtitle.length);
 
       const scrambleInterval = setInterval(() => {
         // Scramble the time
@@ -167,9 +188,33 @@ function CyclingBestEffortCard({
             .split("")
             .map((char, index) => {
               if (char === ":") return ":";
-              if (index < iteration) {
-                return targetTime[index];
+              if (index < iteration) return targetTime[index];
+              return CHARS[Math.floor(Math.random() * 10)];
+            })
+            .join("")
+        );
+
+        // Scramble the label
+        setDisplayLabel(
+          targetLabel
+            .split("")
+            .map((char, index) => {
+              if (index < iteration) return targetLabel[index];
+              return LABEL_CHARS[Math.floor(Math.random() * LABEL_CHARS.length)];
+            })
+            .join("")
+        );
+
+        // Scramble the subtitle
+        setDisplaySubtitle(
+          targetSubtitle
+            .split("")
+            .map((char, index) => {
+              if (char === "." || char === "k" || char === "m") {
+                if (index < iteration) return targetSubtitle[index];
+                return char;
               }
+              if (index < iteration) return targetSubtitle[index];
               return CHARS[Math.floor(Math.random() * 10)];
             })
             .join("")
@@ -177,10 +222,11 @@ function CyclingBestEffortCard({
 
         iteration += 0.5;
 
-        if (iteration >= targetTime.length) {
+        if (iteration >= maxIterations) {
           clearInterval(scrambleInterval);
           setDisplayTime(targetTime);
           setDisplayLabel(targetLabel);
+          setDisplaySubtitle(targetSubtitle);
           setCurrentIndex(nextIndex);
           setIsScrambling(false);
         }
@@ -191,8 +237,12 @@ function CyclingBestEffortCard({
   }, [currentIndex, efforts]);
 
   return (
-    <div ref={cardRef} className="bg-ink-2 border border-ink-3 p-6 opacity-0">
-      <div className="font-mono text-xs text-muted mb-2 uppercase tracking-wider">
+    <div ref={cardRef} className="bg-ink-2 border border-ink-3 p-6 opacity-0 relative overflow-hidden">
+      <div
+        className={`font-mono text-xs text-muted mb-2 uppercase tracking-wider transition-opacity duration-100 ${
+          isScrambling ? "opacity-80" : "opacity-100"
+        }`}
+      >
         Best {displayLabel}
       </div>
       <div
@@ -202,8 +252,19 @@ function CyclingBestEffortCard({
       >
         {displayTime}
       </div>
-      <div className="font-mono text-xs text-coral">
-        personal best
+      <div
+        className={`font-mono text-xs text-coral transition-opacity duration-100 ${
+          isScrambling ? "opacity-80" : "opacity-100"
+        }`}
+      >
+        {displaySubtitle}
+      </div>
+      {/* Progress bar */}
+      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-ink-3">
+        <div
+          className="h-full bg-coral transition-none"
+          style={{ width: `${progress}%` }}
+        />
       </div>
     </div>
   );
@@ -212,12 +273,10 @@ function CyclingBestEffortCard({
 export default function StravaStats({
   totalKm,
   totalRuns,
-  consecutiveWeeks,
   best5k,
   best10k,
   bestHalfMarathon,
   bestMarathon,
-  marathonGoal,
   loading = false,
   error = false,
 }: StravaStatsProps) {
@@ -260,8 +319,8 @@ export default function StravaStats({
     return (
       <section className="px-6 md:px-12 py-16">
         <div className="max-w-[1400px] mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
+          <div className="grid grid-cols-3 gap-4">
+            {[...Array(3)].map((_, i) => (
               <div key={i} className="bg-ink-2 border border-ink-3 p-6 animate-pulse">
                 <div className="h-3 bg-ink-3 rounded w-20 mb-4" />
                 <div className="h-12 bg-ink-3 rounded w-24 mb-2" />
@@ -292,7 +351,7 @@ export default function StravaStats({
         </div>
 
         {/* Stats grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <StatCard
             label="Total distance"
             value={error ? "—" : totalKm ?? 0}
@@ -308,13 +367,6 @@ export default function StravaStats({
             delay={1}
           />
           <CyclingBestEffortCard efforts={bestEfforts} delay={2} />
-          <StatCard
-            label="Marathon PB"
-            value={bestMarathon}
-            subtitle={marathonGoal}
-            delay={3}
-            accentSubtitle
-          />
         </div>
 
         {error && (

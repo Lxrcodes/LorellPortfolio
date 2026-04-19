@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from "react";
 import StravaStats from "./StravaStats";
-import { bestEfforts, marathonGoal } from "@/lib/runningStats";
+import { bestEfforts } from "@/lib/runningStats";
 
 interface StravaData {
   totalKm: number;
   totalRuns: number;
-  consecutiveWeeks: number;
   error?: boolean;
 }
 
@@ -39,16 +38,12 @@ export default function StravaStatsWrapper() {
 
   return (
     <StravaStats
-      // From Strava API
       totalKm={stats?.totalKm ?? null}
       totalRuns={stats?.totalRuns ?? null}
-      consecutiveWeeks={stats?.consecutiveWeeks ?? null}
-      // From config (your manual PBs)
       best5k={bestEfforts["5k"]}
       best10k={bestEfforts["10k"]}
       bestHalfMarathon={bestEfforts["halfMarathon"]}
       bestMarathon={bestEfforts["marathon"]}
-      marathonGoal={`${marathonGoal.race} — ${marathonGoal.target}`}
       loading={loading}
       error={error}
     />
