@@ -125,6 +125,7 @@ function CyclingBestEffortCard({
   const [displaySubtitle, setDisplaySubtitle] = useState(efforts[0].distance);
   const [isScrambling, setIsScrambling] = useState(false);
   const [progress, setProgress] = useState(100);
+  const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -153,27 +154,34 @@ function CyclingBestEffortCard({
     return () => ctx.revert();
   }, [delay]);
 
-  // Progress bar countdown
+  // Start countdown, then scramble, then restart
   useEffect(() => {
-    const duration = 3000;
-    const interval = 30;
-    const step = (interval / duration) * 100;
+    const countdownDuration = 3000;
+    const countdownInterval = 30;
+    const step = (countdownInterval / countdownDuration) * 100;
 
-    const timer = setInterval(() => {
-      setProgress((prev) => {
-        if (prev <= 0) return 100;
-        return prev - step;
-      });
-    }, interval);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  // Cycle through efforts with scramble effect
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsScrambling(true);
+    const startCountdown = () => {
       setProgress(100);
+
+      progressTimerRef.current = setInterval(() => {
+        setProgress((prev) => {
+          const newProgress = prev - step;
+          if (newProgress <= 0) {
+            // Stop countdown at 0
+            if (progressTimerRef.current) {
+              clearInterval(progressTimerRef.current);
+            }
+            // Start scramble animation
+            runScramble();
+            return 0;
+          }
+          return newProgress;
+        });
+      }, countdownInterval);
+    };
+
+    const runScramble = () => {
+      setIsScrambling(true);
       const nextIndex = (currentIndex + 1) % efforts.length;
       const targetTime = efforts[nextIndex].time;
       const targetLabel = efforts[nextIndex].label;
@@ -182,7 +190,6 @@ function CyclingBestEffortCard({
       const maxIterations = Math.max(targetTime.length, targetLabel.length, targetSubtitle.length);
 
       const scrambleInterval = setInterval(() => {
-        // Scramble the time
         setDisplayTime(
           targetTime
             .split("")
@@ -194,7 +201,6 @@ function CyclingBestEffortCard({
             .join("")
         );
 
-        // Scramble the label
         setDisplayLabel(
           targetLabel
             .split("")
@@ -205,7 +211,6 @@ function CyclingBestEffortCard({
             .join("")
         );
 
-        // Scramble the subtitle
         setDisplaySubtitle(
           targetSubtitle
             .split("")
@@ -229,12 +234,24 @@ function CyclingBestEffortCard({
           setDisplaySubtitle(targetSubtitle);
           setCurrentIndex(nextIndex);
           setIsScrambling(false);
+          // Restart countdown after scramble completes
+          startCountdown();
         }
       }, 40);
-    }, 3000);
+    };
 
-    return () => clearInterval(interval);
-  }, [currentIndex, efforts]);
+    startCountdown();
+
+    return () => {
+      if (progressTimerRef.current) {
+        clearInterval(progressTimerRef.current);
+      }
+    };
+  }, []); // Only run once on mount
+
+  // Update currentIndex ref for the scramble function
+  const currentIndexRef = useRef(currentIndex);
+  currentIndexRef.current = currentIndex;
 
   return (
     <div ref={cardRef} className="bg-ink-2 border border-ink-3 p-6 opacity-0 relative overflow-hidden">
@@ -262,8 +279,8 @@ function CyclingBestEffortCard({
       {/* Progress bar */}
       <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-ink-3">
         <div
-          className="h-full bg-coral transition-none"
-          style={{ width: `${progress}%` }}
+          className="h-full bg-coral"
+          style={{ width: `${progress}%`, transition: isScrambling ? "none" : "width 30ms linear" }}
         />
       </div>
     </div>
@@ -359,14 +376,14 @@ export default function StravaStats({
             isNumber={!error && totalKm !== null}
             delay={0}
           />
+          <CyclingBestEffortCard efforts={bestEfforts} delay={1} />
           <StatCard
             label="Total runs"
             value={error ? "—" : totalRuns ?? 0}
             subtitle="all time"
             isNumber={!error && totalRuns !== null}
-            delay={1}
+            delay={2}
           />
-          <CyclingBestEffortCard efforts={bestEfforts} delay={2} />
         </div>
 
         {error && (
