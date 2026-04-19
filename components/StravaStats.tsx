@@ -262,8 +262,10 @@ function CyclingBestEffortCard({
         <span className="md:ml-1">{displayLabel}</span>
       </div>
       <div
-        className={`font-display text-2xl sm:text-4xl md:text-5xl text-sand mb-2 transition-opacity duration-100 ${
+        className={`font-display md:text-5xl text-sand mb-2 transition-opacity duration-100 ${
           isScrambling ? "opacity-80" : "opacity-100"
+        } ${
+          (displayTime.match(/:/g) || []).length >= 2 ? "text-2xl sm:text-4xl" : "text-4xl"
         }`}
       >
         {displayTime}
