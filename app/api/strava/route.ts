@@ -103,10 +103,25 @@ export async function GET() {
 
     const tokenData = await tokenRes.json();
     const accessToken = tokenData.access_token;
-    const athleteId = tokenData.athlete?.id;
+    let athleteId = tokenData.athlete?.id;
+
+    // If athlete ID not in token response, fetch it from /athlete endpoint
+    if (!athleteId) {
+      const athleteRes = await fetch("https://www.strava.com/api/v3/athlete", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        cache: "no-store",
+      });
+
+      if (!athleteRes.ok) {
+        throw new Error(`Failed to fetch athlete: ${athleteRes.status}`);
+      }
+
+      const athlete = await athleteRes.json();
+      athleteId = athlete.id;
+    }
 
     if (!athleteId) {
-      throw new Error("No athlete ID in token response");
+      throw new Error("Could not get athlete ID");
     }
 
     // Fetch athlete stats - this gives us all-time totals
