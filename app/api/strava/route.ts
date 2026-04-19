@@ -8,32 +8,21 @@ interface StravaActivity {
   type: string;
   distance: number;
   start_date: string;
-  best_efforts?: BestEffort[];
-}
-
-interface BestEffort {
-  name: string;
-  elapsed_time: number;
-  moving_time: number;
 }
 
 interface AthleteStats {
+  biggest_run_distance: number;
   all_run_totals: {
     count: number;
     distance: number;
+    moving_time: number;
     elapsed_time: number;
+    elevation_gain: number;
   };
-}
-
-function formatTime(seconds: number): string {
-  const hrs = Math.floor(seconds / 3600);
-  const mins = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
-
-  if (hrs > 0) {
-    return `${hrs}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  }
-  return `${mins}:${secs.toString().padStart(2, "0")}`;
+  ytd_run_totals: {
+    count: number;
+    distance: number;
+  };
 }
 
 function getWeekNumber(date: Date): string {
@@ -47,33 +36,31 @@ function getWeekNumber(date: Date): string {
 function calculateConsecutiveWeeks(activities: StravaActivity[]): number {
   if (activities.length === 0) return 0;
 
-  // Get unique weeks with runs
   const weeksWithRuns = new Set<string>();
   activities.forEach((activity) => {
     const date = new Date(activity.start_date);
     weeksWithRuns.add(getWeekNumber(date));
   });
 
-  // Get current week
   const now = new Date();
-  const currentWeek = getWeekNumber(now);
-
-  // Count backwards from current week
   let consecutiveWeeks = 0;
   let checkDate = new Date(now);
 
-  // Start from current week
   while (true) {
     const weekKey = getWeekNumber(checkDate);
     if (weeksWithRuns.has(weekKey)) {
       consecutiveWeeks++;
-      // Go back 7 days
       checkDate.setDate(checkDate.getDate() - 7);
     } else {
-      // If current week has no runs yet, don't break - check previous
-      if (weekKey === currentWeek && consecutiveWeeks === 0) {
+      // If current week has no runs yet, check previous week
+      if (consecutiveWeeks === 0) {
         checkDate.setDate(checkDate.getDate() - 7);
-        continue;
+        const prevWeekKey = getWeekNumber(checkDate);
+        if (weeksWithRuns.has(prevWeekKey)) {
+          consecutiveWeeks++;
+          checkDate.setDate(checkDate.getDate() - 7);
+          continue;
+        }
       }
       break;
     }
@@ -88,16 +75,14 @@ export async function GET() {
     const clientSecret = process.env.STRAVA_CLIENT_SECRET;
     const refreshToken = process.env.STRAVA_REFRESH_TOKEN;
 
-    // Check if credentials are configured
     if (!clientId || !clientSecret || !refreshToken) {
       return NextResponse.json({
         error: true,
-        cached: true,
         reason: "missing_credentials",
       });
     }
 
-    // Exchange refresh token for access token
+    // Get access token
     const tokenRes = await fetch("https://www.strava.com/oauth/token", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -111,14 +96,20 @@ export async function GET() {
     });
 
     if (!tokenRes.ok) {
-      throw new Error(`Failed to refresh token: ${tokenRes.status}`);
+      const errorText = await tokenRes.text();
+      console.error("Token refresh failed:", tokenRes.status, errorText);
+      throw new Error(`Token refresh failed: ${tokenRes.status}`);
     }
 
     const tokenData = await tokenRes.json();
     const accessToken = tokenData.access_token;
     const athleteId = tokenData.athlete?.id;
 
-    // Fetch athlete stats for all-time totals
+    if (!athleteId) {
+      throw new Error("No athlete ID in token response");
+    }
+
+    // Fetch athlete stats - this gives us all-time totals
     const statsRes = await fetch(
       `https://www.strava.com/api/v3/athletes/${athleteId}/stats`,
       {
@@ -127,22 +118,24 @@ export async function GET() {
       }
     );
 
-    let allTimeStats = { count: 0, distance: 0 };
-    if (statsRes.ok) {
-      const stats: AthleteStats = await statsRes.json();
-      allTimeStats = {
-        count: stats.all_run_totals.count,
-        distance: stats.all_run_totals.distance,
-      };
+    if (!statsRes.ok) {
+      const errorText = await statsRes.text();
+      console.error("Stats fetch failed:", statsRes.status, errorText);
+      throw new Error(`Stats fetch failed: ${statsRes.status}`);
     }
 
-    // Fetch all activities to find best efforts and calculate streaks
+    const stats: AthleteStats = await statsRes.json();
+
+    // Fetch recent activities for consecutive weeks calculation
     let allRuns: StravaActivity[] = [];
     let page = 1;
 
-    while (true) {
+    // Only fetch last 2 years of activities for streak calculation
+    const twoYearsAgo = Math.floor(Date.now() / 1000) - (2 * 365 * 24 * 60 * 60);
+
+    while (page <= 10) { // Limit to 1000 activities max
       const res = await fetch(
-        `https://www.strava.com/api/v3/athlete/activities?per_page=100&page=${page}`,
+        `https://www.strava.com/api/v3/athlete/activities?per_page=100&page=${page}&after=${twoYearsAgo}`,
         {
           headers: { Authorization: `Bearer ${accessToken}` },
           cache: "no-store",
@@ -160,84 +153,23 @@ export async function GET() {
       page++;
     }
 
-    // Find longest run
-    const longestRun = allRuns.length > 0
-      ? Math.max(...allRuns.map((a) => a.distance)) / 1000
-      : 0;
-
-    // Calculate consecutive weeks
     const consecutiveWeeks = calculateConsecutiveWeeks(allRuns);
 
-    // Fetch best efforts from recent activities (need individual activity details)
-    // Best efforts are only available when fetching single activity
-    const bestEfforts: Record<string, number | null> = {
-      "5k": null,
-      "10k": null,
-      "half_marathon": null,
-      "marathon": null,
-    };
-
-    // Fetch details for activities that might have best efforts (longer runs)
-    const potentialBestEffortRuns = allRuns
-      .filter((a) => a.distance >= 5000)
-      .slice(0, 50); // Check last 50 long runs
-
-    for (const run of potentialBestEffortRuns) {
-      const activityRes = await fetch(
-        `https://www.strava.com/api/v3/activities/${run.id}`,
-        {
-          headers: { Authorization: `Bearer ${accessToken}` },
-          cache: "no-store",
-        }
-      );
-
-      if (!activityRes.ok) continue;
-
-      const activity = await activityRes.json();
-
-      if (activity.best_efforts) {
-        for (const effort of activity.best_efforts) {
-          const name = effort.name.toLowerCase();
-          const time = effort.elapsed_time;
-
-          if (name === "5k" && (!bestEfforts["5k"] || time < bestEfforts["5k"])) {
-            bestEfforts["5k"] = time;
-          }
-          if (name === "10k" && (!bestEfforts["10k"] || time < bestEfforts["10k"])) {
-            bestEfforts["10k"] = time;
-          }
-          if (name === "half-marathon" && (!bestEfforts["half_marathon"] || time < bestEfforts["half_marathon"])) {
-            bestEfforts["half_marathon"] = time;
-          }
-          if (name === "marathon" && (!bestEfforts["marathon"] || time < bestEfforts["marathon"])) {
-            bestEfforts["marathon"] = time;
-          }
-        }
-      }
-    }
-
     return NextResponse.json({
-      // All-time stats
-      totalKm: Math.round(allTimeStats.distance / 1000),
-      totalRuns: allTimeStats.count,
-      longestRunKm: longestRun.toFixed(1),
+      // From athlete stats endpoint
+      totalKm: Math.round(stats.all_run_totals.distance / 1000),
+      totalRuns: stats.all_run_totals.count,
+      longestRunKm: (stats.biggest_run_distance / 1000).toFixed(1),
+
+      // Calculated from activities
       consecutiveWeeks,
 
-      // Best efforts (formatted times)
-      best5k: bestEfforts["5k"] ? formatTime(bestEfforts["5k"]) : null,
-      best10k: bestEfforts["10k"] ? formatTime(bestEfforts["10k"]) : null,
-      bestHalfMarathon: bestEfforts["half_marathon"] ? formatTime(bestEfforts["half_marathon"]) : null,
-      bestMarathon: bestEfforts["marathon"] ? formatTime(bestEfforts["marathon"]) : null,
+      // Year to date
+      ytdKm: Math.round(stats.ytd_run_totals.distance / 1000),
+      ytdRuns: stats.ytd_run_totals.count,
     });
   } catch (error) {
     console.error("Strava API error:", error);
-
-    return NextResponse.json(
-      {
-        error: true,
-        cached: true,
-      },
-      { status: 200 }
-    );
+    return NextResponse.json({ error: true }, { status: 200 });
   }
 }

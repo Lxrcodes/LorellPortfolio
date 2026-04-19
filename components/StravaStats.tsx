@@ -9,10 +9,11 @@ interface StravaStatsProps {
   totalRuns: number | null;
   longestRunKm: string | null;
   consecutiveWeeks: number | null;
-  best5k: string | null;
-  best10k: string | null;
-  bestHalfMarathon: string | null;
-  bestMarathon: string | null;
+  best5k: string;
+  best10k: string;
+  bestHalfMarathon: string;
+  bestMarathon: string;
+  marathonGoal: string;
   loading?: boolean;
   error?: boolean;
 }
@@ -35,7 +36,6 @@ function StatCard({
   accentSubtitle = false,
 }: StatCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
-  const valueRef = useRef<HTMLDivElement>(null);
   const [displayValue, setDisplayValue] = useState(isNumber ? 0 : value);
   const hasAnimated = useRef(false);
 
@@ -45,7 +45,6 @@ function StatCard({
     gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
-      // Card entrance animation
       gsap.fromTo(
         cardRef.current,
         { opacity: 0, y: 30 },
@@ -63,7 +62,6 @@ function StatCard({
         }
       );
 
-      // Number countup animation
       if (isNumber && !hasAnimated.current) {
         ScrollTrigger.create({
           trigger: cardRef.current,
@@ -82,9 +80,7 @@ function StatCard({
               ease: "power3.out",
               onUpdate: () => {
                 setDisplayValue(
-                  numValue >= 100
-                    ? Math.round(obj.val)
-                    : obj.val.toFixed(1)
+                  numValue >= 100 ? Math.round(obj.val) : obj.val.toFixed(1)
                 );
               },
             });
@@ -97,23 +93,15 @@ function StatCard({
   }, [value, isNumber, delay]);
 
   return (
-    <div
-      ref={cardRef}
-      className="bg-ink-2 border border-ink-3 p-6 opacity-0"
-    >
+    <div ref={cardRef} className="bg-ink-2 border border-ink-3 p-6 opacity-0">
       <div className="font-mono text-xs text-muted mb-2 uppercase tracking-wider">
         {label}
       </div>
-      <div
-        ref={valueRef}
-        className="font-display text-4xl md:text-5xl text-sand mb-2"
-      >
+      <div className="font-display text-4xl md:text-5xl text-sand mb-2">
         {displayValue}
       </div>
       {subtitle && (
-        <div
-          className={`font-mono text-xs ${accentSubtitle ? "text-coral" : "text-muted"}`}
-        >
+        <div className={`font-mono text-xs ${accentSubtitle ? "text-coral" : "text-muted"}`}>
           {subtitle}
         </div>
       )}
@@ -130,6 +118,7 @@ export default function StravaStats({
   best10k,
   bestHalfMarathon,
   bestMarathon,
+  marathonGoal,
   loading = false,
   error = false,
 }: StravaStatsProps) {
@@ -167,10 +156,7 @@ export default function StravaStats({
         <div className="max-w-[1400px] mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[...Array(8)].map((_, i) => (
-              <div
-                key={i}
-                className="bg-ink-2 border border-ink-3 p-6 animate-pulse"
-              >
+              <div key={i} className="bg-ink-2 border border-ink-3 p-6 animate-pulse">
                 <div className="h-3 bg-ink-3 rounded w-20 mb-4" />
                 <div className="h-12 bg-ink-3 rounded w-24 mb-2" />
                 <div className="h-2 bg-ink-3 rounded w-16" />
@@ -186,16 +172,9 @@ export default function StravaStats({
     <section className="px-6 md:px-12 py-16">
       <div className="max-w-[1400px] mx-auto">
         {/* Strava header */}
-        <div
-          ref={headerRef}
-          className="flex items-center gap-4 mb-8 opacity-0"
-        >
-          {/* Strava logo */}
+        <div ref={headerRef} className="flex items-center gap-4 mb-8 opacity-0">
           <div className="w-8 h-8 bg-[#FC4C02] flex items-center justify-center">
-            <svg
-              viewBox="0 0 24 24"
-              className="w-5 h-5 text-white fill-current"
-            >
+            <svg viewBox="0 0 24 24" className="w-5 h-5 text-white fill-current">
               <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
             </svg>
           </div>
@@ -206,7 +185,7 @@ export default function StravaStats({
           </div>
         </div>
 
-        {/* Stats grid - row 1: all-time stats */}
+        {/* Row 1: Live stats from Strava */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <StatCard
             label="Total distance"
@@ -226,7 +205,7 @@ export default function StravaStats({
             label="Longest run"
             value={error ? "—" : longestRunKm ?? "0"}
             subtitle="km"
-            isNumber={!error && longestRunKm !== null}
+            isNumber={false}
             delay={2}
           />
           <StatCard
@@ -238,45 +217,41 @@ export default function StravaStats({
           />
         </div>
 
-        {/* Stats grid - row 2: best efforts */}
+        {/* Row 2: Personal bests */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard
             label="Best 5K"
-            value={error ? "—" : best5k ?? "—"}
+            value={best5k}
             subtitle="personal best"
-            isNumber={false}
             delay={4}
-            accentSubtitle={!!best5k}
+            accentSubtitle
           />
           <StatCard
             label="Best 10K"
-            value={error ? "—" : best10k ?? "—"}
+            value={best10k}
             subtitle="personal best"
-            isNumber={false}
             delay={5}
-            accentSubtitle={!!best10k}
+            accentSubtitle
           />
           <StatCard
-            label="Best Half Marathon"
-            value={error ? "—" : bestHalfMarathon ?? "—"}
+            label="Best Half"
+            value={bestHalfMarathon}
             subtitle="21.1km"
-            isNumber={false}
             delay={6}
-            accentSubtitle={!!bestHalfMarathon}
+            accentSubtitle
           />
           <StatCard
             label="Best Marathon"
-            value={error ? "—" : bestMarathon ?? "—"}
-            subtitle="42.2km"
-            isNumber={false}
+            value={bestMarathon}
+            subtitle={marathonGoal}
             delay={7}
-            accentSubtitle={!!bestMarathon}
+            accentSubtitle
           />
         </div>
 
         {error && (
           <p className="font-mono text-xs text-muted mt-4">
-            Unable to load live Strava data.
+            Unable to load live Strava data. Showing personal bests only.
           </p>
         )}
       </div>

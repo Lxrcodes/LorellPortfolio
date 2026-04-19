@@ -2,17 +2,15 @@
 
 import { useEffect, useState } from "react";
 import StravaStats from "./StravaStats";
+import { bestEfforts, marathonGoal } from "@/lib/runningStats";
 
 interface StravaData {
   totalKm: number;
   totalRuns: number;
   longestRunKm: string;
   consecutiveWeeks: number;
-  best5k: string | null;
-  best10k: string | null;
-  bestHalfMarathon: string | null;
-  bestMarathon: string | null;
-  cached?: boolean;
+  ytdKm: number;
+  ytdRuns: number;
   error?: boolean;
 }
 
@@ -44,14 +42,17 @@ export default function StravaStatsWrapper() {
 
   return (
     <StravaStats
+      // From Strava API
       totalKm={stats?.totalKm ?? null}
       totalRuns={stats?.totalRuns ?? null}
       longestRunKm={stats?.longestRunKm ?? null}
       consecutiveWeeks={stats?.consecutiveWeeks ?? null}
-      best5k={stats?.best5k ?? null}
-      best10k={stats?.best10k ?? null}
-      bestHalfMarathon={stats?.bestHalfMarathon ?? null}
-      bestMarathon={stats?.bestMarathon ?? null}
+      // From config (your manual PBs)
+      best5k={bestEfforts["5k"]}
+      best10k={bestEfforts["10k"]}
+      bestHalfMarathon={bestEfforts["halfMarathon"]}
+      bestMarathon={bestEfforts["marathon"]}
+      marathonGoal={`${marathonGoal.race} — ${marathonGoal.target}`}
       loading={loading}
       error={error}
     />
