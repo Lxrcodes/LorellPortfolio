@@ -20,12 +20,17 @@ export async function GET() {
 
     // Check if credentials are configured
     if (!clientId || !clientSecret || !refreshToken) {
-      // Return fallback data if Strava is not configured
+      console.log("Strava credentials missing:", {
+        hasClientId: !!clientId,
+        hasClientSecret: !!clientSecret,
+        hasRefreshToken: !!refreshToken,
+      });
       return NextResponse.json({
         totalKm: 850,
         count: 72,
         longestKm: "42.2",
         cached: true,
+        reason: "missing_credentials",
       });
     }
 
@@ -42,7 +47,9 @@ export async function GET() {
     });
 
     if (!tokenRes.ok) {
-      throw new Error("Failed to refresh Strava token");
+      const errorText = await tokenRes.text();
+      console.error("Strava token refresh failed:", tokenRes.status, errorText);
+      throw new Error(`Failed to refresh Strava token: ${tokenRes.status}`);
     }
 
     const { access_token }: TokenResponse = await tokenRes.json();
