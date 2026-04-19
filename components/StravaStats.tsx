@@ -7,7 +7,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 interface StravaStatsProps {
   totalKm: number | null;
   totalRuns: number | null;
-  longestRunKm: string | null;
   consecutiveWeeks: number | null;
   best5k: string;
   best10k: string;
@@ -26,6 +25,8 @@ interface StatCardProps {
   delay?: number;
   accentSubtitle?: boolean;
 }
+
+const CHARS = "0123456789:";
 
 function StatCard({
   value,
@@ -109,10 +110,108 @@ function StatCard({
   );
 }
 
+// Cycling best efforts card with scramble animation
+function CyclingBestEffortCard({
+  efforts,
+  delay = 0,
+}: {
+  efforts: { label: string; time: string; distance: string }[];
+  delay?: number;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [displayTime, setDisplayTime] = useState(efforts[0].time);
+  const [displayLabel, setDisplayLabel] = useState(efforts[0].label);
+  const [isScrambling, setIsScrambling] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        cardRef.current,
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          delay: delay * 0.1,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: cardRef.current,
+            start: "top 85%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+    });
+
+    return () => ctx.revert();
+  }, [delay]);
+
+  // Cycle through efforts with scramble effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsScrambling(true);
+      const nextIndex = (currentIndex + 1) % efforts.length;
+      const targetTime = efforts[nextIndex].time;
+      const targetLabel = efforts[nextIndex].label;
+      let iteration = 0;
+
+      const scrambleInterval = setInterval(() => {
+        // Scramble the time
+        setDisplayTime(
+          targetTime
+            .split("")
+            .map((char, index) => {
+              if (char === ":") return ":";
+              if (index < iteration) {
+                return targetTime[index];
+              }
+              return CHARS[Math.floor(Math.random() * 10)];
+            })
+            .join("")
+        );
+
+        iteration += 0.5;
+
+        if (iteration >= targetTime.length) {
+          clearInterval(scrambleInterval);
+          setDisplayTime(targetTime);
+          setDisplayLabel(targetLabel);
+          setCurrentIndex(nextIndex);
+          setIsScrambling(false);
+        }
+      }, 40);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [currentIndex, efforts]);
+
+  return (
+    <div ref={cardRef} className="bg-ink-2 border border-ink-3 p-6 opacity-0">
+      <div className="font-mono text-xs text-muted mb-2 uppercase tracking-wider">
+        Best {displayLabel}
+      </div>
+      <div
+        className={`font-display text-4xl md:text-5xl text-sand mb-2 transition-opacity duration-100 ${
+          isScrambling ? "opacity-80" : "opacity-100"
+        }`}
+      >
+        {displayTime}
+      </div>
+      <div className="font-mono text-xs text-coral">
+        personal best
+      </div>
+    </div>
+  );
+}
+
 export default function StravaStats({
   totalKm,
   totalRuns,
-  longestRunKm,
   consecutiveWeeks,
   best5k,
   best10k,
@@ -123,6 +222,13 @@ export default function StravaStats({
   error = false,
 }: StravaStatsProps) {
   const headerRef = useRef<HTMLDivElement>(null);
+
+  const bestEfforts = [
+    { label: "5K", time: best5k, distance: "5km" },
+    { label: "10K", time: best10k, distance: "10km" },
+    { label: "Half", time: bestHalfMarathon, distance: "21.1km" },
+    { label: "Marathon", time: bestMarathon, distance: "42.2km" },
+  ];
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -155,7 +261,7 @@ export default function StravaStats({
       <section className="px-6 md:px-12 py-16">
         <div className="max-w-[1400px] mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[...Array(8)].map((_, i) => (
+            {[...Array(4)].map((_, i) => (
               <div key={i} className="bg-ink-2 border border-ink-3 p-6 animate-pulse">
                 <div className="h-3 bg-ink-3 rounded w-20 mb-4" />
                 <div className="h-12 bg-ink-3 rounded w-24 mb-2" />
@@ -185,8 +291,8 @@ export default function StravaStats({
           </div>
         </div>
 
-        {/* Row 1: Live stats from Strava */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+        {/* Stats grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard
             label="Total distance"
             value={error ? "—" : totalKm ?? 0}
@@ -201,57 +307,19 @@ export default function StravaStats({
             isNumber={!error && totalRuns !== null}
             delay={1}
           />
+          <CyclingBestEffortCard efforts={bestEfforts} delay={2} />
           <StatCard
-            label="Longest run"
-            value={error ? "—" : longestRunKm ?? "0"}
-            subtitle="km"
-            isNumber={false}
-            delay={2}
-          />
-          <StatCard
-            label="Run streak"
-            value={error ? "—" : consecutiveWeeks ?? 0}
-            subtitle="consecutive weeks"
-            isNumber={!error && consecutiveWeeks !== null}
-            delay={3}
-          />
-        </div>
-
-        {/* Row 2: Personal bests */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard
-            label="Best 5K"
-            value={best5k}
-            subtitle="personal best"
-            delay={4}
-            accentSubtitle
-          />
-          <StatCard
-            label="Best 10K"
-            value={best10k}
-            subtitle="personal best"
-            delay={5}
-            accentSubtitle
-          />
-          <StatCard
-            label="Best Half"
-            value={bestHalfMarathon}
-            subtitle="21.1km"
-            delay={6}
-            accentSubtitle
-          />
-          <StatCard
-            label="Best Marathon"
+            label="Marathon PB"
             value={bestMarathon}
             subtitle={marathonGoal}
-            delay={7}
+            delay={3}
             accentSubtitle
           />
         </div>
 
         {error && (
           <p className="font-mono text-xs text-muted mt-4">
-            Unable to load live Strava data. Showing personal bests only.
+            Unable to load some live Strava data.
           </p>
         )}
       </div>

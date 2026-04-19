@@ -7,10 +7,7 @@ import { bestEfforts, marathonGoal } from "@/lib/runningStats";
 interface StravaData {
   totalKm: number;
   totalRuns: number;
-  longestRunKm: string;
   consecutiveWeeks: number;
-  ytdKm: number;
-  ytdRuns: number;
   error?: boolean;
 }
 
@@ -45,7 +42,6 @@ export default function StravaStatsWrapper() {
       // From Strava API
       totalKm={stats?.totalKm ?? null}
       totalRuns={stats?.totalRuns ?? null}
-      longestRunKm={stats?.longestRunKm ?? null}
       consecutiveWeeks={stats?.consecutiveWeeks ?? null}
       // From config (your manual PBs)
       best5k={bestEfforts["5k"]}
