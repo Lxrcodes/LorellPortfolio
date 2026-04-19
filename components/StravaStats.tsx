@@ -126,6 +126,7 @@ function CyclingBestEffortCard({
   const [isScrambling, setIsScrambling] = useState(false);
   const [progress, setProgress] = useState(100);
   const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const currentIndexRef = useRef(0);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -182,7 +183,7 @@ function CyclingBestEffortCard({
 
     const runScramble = () => {
       setIsScrambling(true);
-      const nextIndex = (currentIndex + 1) % efforts.length;
+      const nextIndex = (currentIndexRef.current + 1) % efforts.length;
       const targetTime = efforts[nextIndex].time;
       const targetLabel = efforts[nextIndex].label;
       const targetSubtitle = efforts[nextIndex].distance;
@@ -232,6 +233,7 @@ function CyclingBestEffortCard({
           setDisplayTime(targetTime);
           setDisplayLabel(targetLabel);
           setDisplaySubtitle(targetSubtitle);
+          currentIndexRef.current = nextIndex;
           setCurrentIndex(nextIndex);
           setIsScrambling(false);
           // Restart countdown after scramble completes
@@ -248,10 +250,6 @@ function CyclingBestEffortCard({
       }
     };
   }, []); // Only run once on mount
-
-  // Update currentIndex ref for the scramble function
-  const currentIndexRef = useRef(currentIndex);
-  currentIndexRef.current = currentIndex;
 
   return (
     <div ref={cardRef} className="bg-ink-2 border border-ink-3 p-6 opacity-0 relative overflow-hidden">
