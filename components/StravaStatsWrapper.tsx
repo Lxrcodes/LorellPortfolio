@@ -5,8 +5,13 @@ import StravaStats from "./StravaStats";
 
 interface StravaData {
   totalKm: number;
-  count: number;
-  longestKm: string;
+  totalRuns: number;
+  longestRunKm: string;
+  consecutiveWeeks: number;
+  best5k: string | null;
+  best10k: string | null;
+  bestHalfMarathon: string | null;
+  bestMarathon: string | null;
   cached?: boolean;
   error?: boolean;
 }
@@ -29,12 +34,6 @@ export default function StravaStatsWrapper() {
       } catch (err) {
         console.error("Error fetching Strava stats:", err);
         setError(true);
-        // Fallback data
-        setStats({
-          totalKm: 850,
-          count: 72,
-          longestKm: "42.2",
-        });
       } finally {
         setLoading(false);
       }
@@ -46,8 +45,13 @@ export default function StravaStatsWrapper() {
   return (
     <StravaStats
       totalKm={stats?.totalKm ?? null}
-      count={stats?.count ?? null}
-      longestKm={stats?.longestKm ?? null}
+      totalRuns={stats?.totalRuns ?? null}
+      longestRunKm={stats?.longestRunKm ?? null}
+      consecutiveWeeks={stats?.consecutiveWeeks ?? null}
+      best5k={stats?.best5k ?? null}
+      best10k={stats?.best10k ?? null}
+      bestHalfMarathon={stats?.bestHalfMarathon ?? null}
+      bestMarathon={stats?.bestMarathon ?? null}
       loading={loading}
       error={error}
     />

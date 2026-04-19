@@ -6,8 +6,13 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 interface StravaStatsProps {
   totalKm: number | null;
-  count: number | null;
-  longestKm: string | null;
+  totalRuns: number | null;
+  longestRunKm: string | null;
+  consecutiveWeeks: number | null;
+  best5k: string | null;
+  best10k: string | null;
+  bestHalfMarathon: string | null;
+  bestMarathon: string | null;
   loading?: boolean;
   error?: boolean;
 }
@@ -101,7 +106,7 @@ function StatCard({
       </div>
       <div
         ref={valueRef}
-        className="font-display text-5xl md:text-6xl text-sand mb-2"
+        className="font-display text-4xl md:text-5xl text-sand mb-2"
       >
         {displayValue}
       </div>
@@ -118,8 +123,13 @@ function StatCard({
 
 export default function StravaStats({
   totalKm,
-  count,
-  longestKm,
+  totalRuns,
+  longestRunKm,
+  consecutiveWeeks,
+  best5k,
+  best10k,
+  bestHalfMarathon,
+  bestMarathon,
   loading = false,
   error = false,
 }: StravaStatsProps) {
@@ -156,7 +166,7 @@ export default function StravaStats({
       <section className="px-6 md:px-12 py-16">
         <div className="max-w-[1400px] mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
+            {[...Array(8)].map((_, i) => (
               <div
                 key={i}
                 className="bg-ink-2 border border-ink-3 p-6 animate-pulse"
@@ -196,42 +206,77 @@ export default function StravaStats({
           </div>
         </div>
 
-        {/* Stats grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Stats grid - row 1: all-time stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <StatCard
-            label="Distance this year"
+            label="Total distance"
             value={error ? "—" : totalKm ?? 0}
-            subtitle="km"
+            subtitle="km all time"
             isNumber={!error && totalKm !== null}
             delay={0}
           />
           <StatCard
-            label="Runs this year"
-            value={error ? "—" : count ?? 0}
-            subtitle="activities"
-            isNumber={!error && count !== null}
+            label="Total runs"
+            value={error ? "—" : totalRuns ?? 0}
+            subtitle="all time"
+            isNumber={!error && totalRuns !== null}
             delay={1}
           />
           <StatCard
             label="Longest run"
-            value={error ? "—" : longestKm ?? "0"}
+            value={error ? "—" : longestRunKm ?? "0"}
             subtitle="km"
-            isNumber={!error && longestKm !== null}
+            isNumber={!error && longestRunKm !== null}
             delay={2}
           />
           <StatCard
-            label="Marathon PB"
-            value="3:47"
-            subtitle="London next — sub 3:30 ↗"
-            isNumber={false}
+            label="Run streak"
+            value={error ? "—" : consecutiveWeeks ?? 0}
+            subtitle="consecutive weeks"
+            isNumber={!error && consecutiveWeeks !== null}
             delay={3}
-            accentSubtitle
+          />
+        </div>
+
+        {/* Stats grid - row 2: best efforts */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCard
+            label="Best 5K"
+            value={error ? "—" : best5k ?? "—"}
+            subtitle="personal best"
+            isNumber={false}
+            delay={4}
+            accentSubtitle={!!best5k}
+          />
+          <StatCard
+            label="Best 10K"
+            value={error ? "—" : best10k ?? "—"}
+            subtitle="personal best"
+            isNumber={false}
+            delay={5}
+            accentSubtitle={!!best10k}
+          />
+          <StatCard
+            label="Best Half Marathon"
+            value={error ? "—" : bestHalfMarathon ?? "—"}
+            subtitle="21.1km"
+            isNumber={false}
+            delay={6}
+            accentSubtitle={!!bestHalfMarathon}
+          />
+          <StatCard
+            label="Best Marathon"
+            value={error ? "—" : bestMarathon ?? "—"}
+            subtitle="42.2km"
+            isNumber={false}
+            delay={7}
+            accentSubtitle={!!bestMarathon}
           />
         </div>
 
         {error && (
           <p className="font-mono text-xs text-muted mt-4">
-            Unable to load live Strava data. Showing cached stats.
+            Unable to load live Strava data.
           </p>
         )}
       </div>
