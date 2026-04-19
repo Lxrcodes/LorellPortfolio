@@ -258,10 +258,11 @@ function CyclingBestEffortCard({
           isScrambling ? "opacity-80" : "opacity-100"
         }`}
       >
-        Best {displayLabel}
+        <span className="block md:inline">Best</span>
+        <span className="md:ml-1">{displayLabel}</span>
       </div>
       <div
-        className={`font-display text-4xl md:text-5xl text-sand mb-2 transition-opacity duration-100 ${
+        className={`font-display text-2xl sm:text-4xl md:text-5xl text-sand mb-2 transition-opacity duration-100 ${
           isScrambling ? "opacity-80" : "opacity-100"
         }`}
       >
