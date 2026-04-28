@@ -5,5 +5,5 @@ export const bestEfforts = {
   "5k": "19:28",
   "10k": "45:02",
   "halfMarathon": "1:39:24",
-  "marathon": "3:47:23",
+  "marathon": "3:40:09",
 };

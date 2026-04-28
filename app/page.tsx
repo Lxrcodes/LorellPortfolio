@@ -32,7 +32,7 @@ export default function Home() {
         number="02"
         label="The runner"
         heading="42.2KM OF PROOF"
-        body="Paris Marathon 2025. 3:47 PB. London next — targeting sub-3:30. The same traits that carry you through mile 22 — showing up, managing pace, refusing to quit — are what I bring to every project. No exceptions."
+        body="London Marathon 2025. 3:40 PB. The same traits that carry you through mile 22 — showing up, managing pace, refusing to quit — are what I bring to every project. No exceptions."
       />
 
       {/* Strava stats */}
