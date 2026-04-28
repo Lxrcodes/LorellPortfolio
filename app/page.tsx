@@ -33,6 +33,7 @@ export default function Home() {
         label="The runner"
         heading="42.2KM OF PROOF"
         body="I've ran 3 Marathons with a 3:40 PB. I bring those same traits that carry me through 26 miles of pain into every project. No exceptions."
+        fullHeight={false}
       />
 
       {/* Paris Marathon video */}

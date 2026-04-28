@@ -10,6 +10,7 @@ interface JourneySectionProps {
   heading: string;
   body: string;
   id?: string;
+  fullHeight?: boolean;
 }
 
 export default function JourneySection({
@@ -18,6 +19,7 @@ export default function JourneySection({
   heading,
   body,
   id,
+  fullHeight = true,
 }: JourneySectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -52,7 +54,7 @@ export default function JourneySection({
     <section
       ref={sectionRef}
       id={id}
-      className="min-h-screen flex items-center px-6 md:px-12 py-24"
+      className={`flex items-center px-6 md:px-12 py-24 ${fullHeight ? "min-h-screen" : ""}`}
     >
       <div ref={contentRef} className="max-w-[700px] opacity-0">
         <div className="font-mono text-sm text-muted mb-6">
