@@ -20,7 +20,7 @@ export default function Home() {
         number="01"
         label="The work"
         heading="BUILT TO LAST"
-        body="From founding a B2B marketplace to e-commerce builds, brand identities and enterprise audits — every project gets the same obsessive attention I give to race day. No half-measures."
+        body="From co-founding a B2B marketplace to e-commerce builds, brand identities and enterprise audits - every project gets the same obsessive attention I give to race day. No half-measures."
       />
 
       {/* Projects grid */}
@@ -32,8 +32,24 @@ export default function Home() {
         number="02"
         label="The runner"
         heading="42.2KM OF PROOF"
-        body="London Marathon 2025. 3:40 PB. The same traits that carry you through mile 22 — showing up, managing pace, refusing to quit — are what I bring to every project. No exceptions."
+        body="I've ran 3 Marathons with a 3:40 PB. I bring those same traits that carry me through 26 miles of pain into every project. No exceptions."
       />
+
+      {/* Paris Marathon video */}
+      <section className="px-6 md:px-12 py-8">
+        <div className="max-w-[1400px] mx-auto">
+          <p className="font-mono text-sm text-muted mb-4">Watch me complete the Paris Marathon 2025</p>
+          <div className="aspect-video w-full max-w-3xl">
+            <iframe
+              className="w-full h-full border border-ink-3"
+              src="https://www.youtube.com/embed/XrOkdzodIM4?start=135"
+              title="Paris Marathon 2025"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      </section>
 
       {/* Strava stats */}
       <StravaStatsWrapper />

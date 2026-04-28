@@ -15,7 +15,7 @@ interface TimelineItem {
 const timelineData: TimelineItem[] = [
   {
     period: "2026–Present",
-    role: "Founder & CEO",
+    role: "Co-Founder & CTO",
     company: "TipperConnect",
     description:
       "Building the UK's first construction haulage marketplace from zero — product, tech, sales and go-to-market.",
@@ -26,7 +26,7 @@ const timelineData: TimelineItem[] = [
     role: "Freelance Web Developer",
     company: "Independent",
     description:
-      "E-commerce, landing pages, audits and full-stack builds for clients across London and beyond.",
+      "E-commerce, landing pages, audits and full-stack builds for clients across London, Sydney and beyond.",
     active: true,
   },
   {

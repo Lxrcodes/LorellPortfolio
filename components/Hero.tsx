@@ -138,7 +138,7 @@ export default function Hero() {
         >
           I build things that go the distance — for clients who need more than
           just a developer. You get someone who&apos;s founded a startup, run
-          marathons, and shipped across four continents.
+          marathons, and shipped across the world.
         </p>
 
         {/* CTAs */}
