@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import StravaStats from "./StravaStats";
-import { bestEfforts } from "@/lib/runningStats";
 
 interface StravaData {
   totalKm: number;
-  totalRuns: number;
+  count: number;
+  longestKm: string;
+  cached?: boolean;
   error?: boolean;
 }
 
@@ -28,6 +29,12 @@ export default function StravaStatsWrapper() {
       } catch (err) {
         console.error("Error fetching Strava stats:", err);
         setError(true);
+        // Fallback data
+        setStats({
+          totalKm: 850,
+          count: 72,
+          longestKm: "60",
+        });
       } finally {
         setLoading(false);
       }
@@ -39,11 +46,8 @@ export default function StravaStatsWrapper() {
   return (
     <StravaStats
       totalKm={stats?.totalKm ?? null}
-      totalRuns={stats?.totalRuns ?? null}
-      best5k={bestEfforts["5k"]}
-      best10k={bestEfforts["10k"]}
-      bestHalfMarathon={bestEfforts["halfMarathon"]}
-      bestMarathon={bestEfforts["marathon"]}
+      count={stats?.count ?? null}
+      longestKm={stats?.longestKm ?? null}
       loading={loading}
       error={error}
     />

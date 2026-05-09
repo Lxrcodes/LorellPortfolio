@@ -101,12 +101,6 @@ export default function FinishSection() {
           >
             hello@lorell.dev
           </a>
-          <a
-            href="#"
-            className="inline-flex items-center justify-center px-8 py-4 border border-sand text-sand font-mono text-sm hover:border-coral hover:text-coral transition-colors"
-          >
-            Download CV
-          </a>
         </div>
       </div>
 
