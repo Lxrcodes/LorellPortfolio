@@ -15,7 +15,7 @@ export const projects: Project[] = [
   {
     id: "tipperconnect",
     name: "TipperConnect",
-    role: "Co-Founder · 2024–present",
+    role: "Co-Founder · 2025–present",
     headline:
       "The UK's first two-sided marketplace for construction waste haulage.",
     description:
@@ -69,5 +69,16 @@ export const projects: Project[] = [
     tags: ["UX audit", "SEO", "Redesign brief", "Implementation"],
     url: "https://asksecurity.netlify.app/",
     image: "/images/projects/ask-security.png",
+  },
+  {
+    id: "check-a-truck",
+    name: "CheckATruck",
+    role: "Freelance · 2025",
+    headline: "Digital vehicle inspection platform for commercial HGV fleets.",
+    description:
+      "A DVSA-compliant daily walkaround check tool replacing paper forms with a fast, mobile-first digital workflow. Drivers log defects on the go, fleet managers review live status, and compliance evidence is always audit-ready.",
+    tags: ["Fleet Management", "Next.js", "Mobile-first", "HGV", "Compliance"],
+    url: "https://checkatruck.co.uk/",
+    image: "/images/projects/check-a-truck.png",
   },
 ];

@@ -56,16 +56,18 @@ export default function JourneySection({
       id={id}
       className={`flex items-center px-6 md:px-12 py-24 ${fullHeight ? "min-h-screen" : ""}`}
     >
-      <div ref={contentRef} className="max-w-[700px] opacity-0">
-        <div className="font-mono text-sm text-muted mb-6">
-          {number} — {label}
+      <div className="max-w-[1400px] mx-auto w-full">
+        <div ref={contentRef} className="max-w-[700px] opacity-0">
+          <div className="font-mono text-sm text-muted mb-6">
+            {number} — {label}
+          </div>
+          <h2 className="font-display text-5xl md:text-7xl text-sand mb-8">
+            {heading}
+          </h2>
+          <p className="font-body text-lg md:text-xl text-muted leading-relaxed">
+            {body}
+          </p>
         </div>
-        <h2 className="font-display text-5xl md:text-7xl text-sand mb-8">
-          {heading}
-        </h2>
-        <p className="font-body text-lg md:text-xl text-muted leading-relaxed">
-          {body}
-        </p>
       </div>
     </section>
   );

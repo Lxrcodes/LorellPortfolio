@@ -99,62 +99,64 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex flex-col justify-end pb-24 px-6 md:px-12">
-      {/* Tag line */}
-      <div
-        ref={tagRef}
-        className="absolute top-28 left-6 md:left-12 font-mono text-sm text-coral opacity-0"
-      >
-        London-based · Available for projects
-      </div>
-
-      {/* Main content */}
-      <div className="max-w-[1400px] mx-auto w-full">
-        {/* Display name */}
-        <h1
-          ref={nameRef}
-          className="font-display text-[20vw] md:text-[13vw] leading-[0.85] text-sand mb-4 opacity-0"
-        >
-          LORELL
-        </h1>
-
-        {/* Kinetic word */}
+    <section className="relative min-h-screen flex flex-col px-6 md:px-12">
+      <div className="max-w-[1400px] mx-auto w-full flex flex-col flex-1">
+        {/* Tag line */}
         <div
-          ref={roleRef}
-          className="font-display text-4xl md:text-6xl text-sand mb-8 opacity-0"
+          ref={tagRef}
+          className="pt-28 font-mono text-sm text-coral opacity-0"
         >
-          I am a{" "}
-          <span
-            className={`text-coral transition-opacity duration-100 ${isScrambling ? "opacity-80" : "opacity-100"}`}
-          >
-            {displayWord}
-          </span>
+          London-based · Available for projects
         </div>
 
-        {/* Subheading */}
-        <p
-          ref={subRef}
-          className="font-body text-lg md:text-xl text-muted max-w-2xl mb-12 opacity-0"
-        >
-          I build things that go the distance — for clients who need more than
-          just a developer. You get someone who&apos;s founded a startup, run
-          marathons, and shipped across the world.
-        </p>
+        {/* Main content pushed to bottom */}
+        <div className="mt-auto pb-24">
+          {/* Display name */}
+          <h1
+            ref={nameRef}
+            className="font-display text-[20vw] md:text-[13vw] leading-[0.85] text-sand mb-4 opacity-0"
+          >
+            LORELL
+          </h1>
 
-        {/* CTAs */}
-        <div ref={ctaRef} className="flex flex-wrap gap-4 opacity-0">
-          <a
-            href="#work"
-            className="inline-flex items-center justify-center px-8 py-4 bg-coral text-ink font-mono text-sm hover:bg-coral-lt transition-colors"
+          {/* Kinetic word */}
+          <div
+            ref={roleRef}
+            className="font-display text-4xl md:text-6xl text-sand mb-8 opacity-0"
           >
-            See the work
-          </a>
-          <a
-            href="#contact"
-            className="inline-flex items-center justify-center px-8 py-4 border border-sand text-sand font-mono text-sm hover:border-coral hover:text-coral transition-colors"
+            I am a{" "}
+            <span
+              className={`text-coral transition-opacity duration-100 ${isScrambling ? "opacity-80" : "opacity-100"}`}
+            >
+              {displayWord}
+            </span>
+          </div>
+
+          {/* Subheading */}
+          <p
+            ref={subRef}
+            className="font-body text-lg md:text-xl text-muted max-w-2xl mb-12 opacity-0"
           >
-            Let&apos;s talk
-          </a>
+            I build things that go the distance — for clients who need more than
+            just a developer. You get someone who&apos;s founded a startup, run
+            marathons, and shipped across the world.
+          </p>
+
+          {/* CTAs */}
+          <div ref={ctaRef} className="flex flex-wrap gap-4 opacity-0">
+            <a
+              href="#work"
+              className="inline-flex items-center justify-center px-8 py-4 bg-coral text-ink font-mono text-sm hover:bg-coral-lt transition-colors"
+            >
+              See the work
+            </a>
+            <a
+              href="#contact"
+              className="inline-flex items-center justify-center px-8 py-4 border border-sand text-sand font-mono text-sm hover:border-coral hover:text-coral transition-colors"
+            >
+              Let&apos;s talk
+            </a>
+          </div>
         </div>
       </div>
 
@@ -164,8 +166,10 @@ export default function Hero() {
         className="absolute bottom-12 right-6 md:right-12 flex flex-col items-center gap-3 opacity-0"
       >
         <div className="w-[1px] h-12 bg-coral animate-scroll-line" />
-        <span className="font-mono text-xs text-muted writing-mode-vertical rotate-180 tracking-wider"
-          style={{ writingMode: "vertical-rl" }}>
+        <span
+          className="font-mono text-xs text-muted rotate-180 tracking-wider"
+          style={{ writingMode: "vertical-rl" }}
+        >
           Scroll to run
         </span>
       </div>

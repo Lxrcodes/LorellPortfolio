@@ -126,6 +126,7 @@ function CyclingBestEffortCard({
   const [isScrambling, setIsScrambling] = useState(false);
   const [progress, setProgress] = useState(100);
   const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const scrambleTimerRef = useRef<NodeJS.Timeout | null>(null);
   const currentIndexRef = useRef(0);
 
   useEffect(() => {
@@ -161,26 +162,6 @@ function CyclingBestEffortCard({
     const countdownInterval = 30;
     const step = (countdownInterval / countdownDuration) * 100;
 
-    const startCountdown = () => {
-      setProgress(100);
-
-      progressTimerRef.current = setInterval(() => {
-        setProgress((prev) => {
-          const newProgress = prev - step;
-          if (newProgress <= 0) {
-            // Stop countdown at 0
-            if (progressTimerRef.current) {
-              clearInterval(progressTimerRef.current);
-            }
-            // Start scramble animation
-            runScramble();
-            return 0;
-          }
-          return newProgress;
-        });
-      }, countdownInterval);
-    };
-
     const runScramble = () => {
       setIsScrambling(true);
       const nextIndex = (currentIndexRef.current + 1) % efforts.length;
@@ -190,7 +171,7 @@ function CyclingBestEffortCard({
       let iteration = 0;
       const maxIterations = Math.max(targetTime.length, targetLabel.length, targetSubtitle.length);
 
-      const scrambleInterval = setInterval(() => {
+      scrambleTimerRef.current = setInterval(() => {
         setDisplayTime(
           targetTime
             .split("")
@@ -229,25 +210,41 @@ function CyclingBestEffortCard({
         iteration += 0.5;
 
         if (iteration >= maxIterations) {
-          clearInterval(scrambleInterval);
+          if (scrambleTimerRef.current) clearInterval(scrambleTimerRef.current);
+          scrambleTimerRef.current = null;
           setDisplayTime(targetTime);
           setDisplayLabel(targetLabel);
           setDisplaySubtitle(targetSubtitle);
           currentIndexRef.current = nextIndex;
           setCurrentIndex(nextIndex);
           setIsScrambling(false);
-          // Restart countdown after scramble completes
           startCountdown();
         }
       }, 40);
     };
 
+    const startCountdown = () => {
+      setProgress(100);
+      let currentProgress = 100;
+
+      progressTimerRef.current = setInterval(() => {
+        currentProgress -= step;
+        if (currentProgress <= 0) {
+          if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+          progressTimerRef.current = null;
+          setProgress(0);
+          runScramble();
+        } else {
+          setProgress(currentProgress);
+        }
+      }, countdownInterval);
+    };
+
     startCountdown();
 
     return () => {
-      if (progressTimerRef.current) {
-        clearInterval(progressTimerRef.current);
-      }
+      if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+      if (scrambleTimerRef.current) clearInterval(scrambleTimerRef.current);
     };
   }, []); // Only run once on mount
 
@@ -265,7 +262,7 @@ function CyclingBestEffortCard({
         className={`font-display md:text-5xl text-sand mb-2 transition-opacity duration-100 ${
           isScrambling ? "opacity-80" : "opacity-100"
         } ${
-          (displayTime.match(/:/g) || []).length >= 2 ? "text-2xl sm:text-4xl" : "text-4xl"
+          (displayTime?.match(/:/g) || []).length >= 2 ? "text-2xl sm:text-4xl" : "text-4xl"
         }`}
       >
         {displayTime}
@@ -337,12 +334,22 @@ export default function StravaStats({
     return (
       <section className="px-6 md:px-12 py-16">
         <div className="max-w-[1400px] mx-auto">
+          {/* Header skeleton */}
+          <div className="flex items-center gap-4 mb-8">
+            <div className="w-8 h-8 bg-ink-3 animate-pulse" />
+            <div className="h-3 bg-ink-3 rounded w-28 animate-pulse" />
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-ink-3 rounded-full animate-pulse" />
+              <div className="h-3 bg-ink-3 rounded w-16 animate-pulse" />
+            </div>
+          </div>
+          {/* Card skeletons */}
           <div className="grid grid-cols-3 gap-4">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-ink-2 border border-ink-3 p-6 animate-pulse">
-                <div className="h-3 bg-ink-3 rounded w-20 mb-4" />
-                <div className="h-12 bg-ink-3 rounded w-24 mb-2" />
-                <div className="h-2 bg-ink-3 rounded w-16" />
+              <div key={i} className="bg-ink-2 border border-ink-3 p-6">
+                <div className="h-3 bg-ink-3 rounded w-24 mb-4 animate-pulse" />
+                <div className="h-10 bg-ink-3 rounded w-32 mb-3 animate-pulse" style={{ animationDelay: `${i * 100}ms` }} />
+                <div className="h-2 bg-ink-3 rounded w-16 animate-pulse" style={{ animationDelay: `${i * 100 + 50}ms` }} />
               </div>
             ))}
           </div>
@@ -389,9 +396,27 @@ export default function StravaStats({
 
         {error && (
           <p className="font-mono text-xs text-muted mt-4">
-            Unable to load some live Strava data.
+            Unable to load live Strava data.
           </p>
         )}
+
+        {/* API note */}
+        <div className="mt-6 pt-6 border-t border-ink-3 flex flex-wrap items-center gap-x-6 gap-y-2">
+          <p className="font-mono text-xs text-muted">
+            These stats are fetched live from the{" "}
+            <span className="text-coral">Strava API</span> on every page load —
+            OAuth 2.0 token refresh, authenticated requests, and server-side
+            data fetching via a Next.js API route.
+          </p>
+          <a
+            href="https://developers.strava.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-xs text-muted hover:text-coral transition-colors whitespace-nowrap"
+          >
+            Strava Developers →
+          </a>
+        </div>
       </div>
     </section>
   );
