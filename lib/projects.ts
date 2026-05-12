@@ -81,4 +81,15 @@ export const projects: Project[] = [
     url: "https://checkatruck.co.uk/",
     image: "/images/projects/check-a-truck.png",
   },
+  {
+    id: "delucas-deli",
+    name: "Delucas Deli",
+    role: "Freelance · 2024",
+    headline: "Restaurant website with a full online menu for a neighbourhood deli-cafe.",
+    description:
+      "Built in React and TypeScript for a local food establishment — covering brand presentation, the full deli menu, and a clean customer-facing experience. Demonstrates end-to-end delivery for food and hospitality clients.",
+    tags: ["React", "TypeScript", "Online Menu", "Food & Beverage"],
+    url: "https://delucas.co.uk/",
+    image: "/images/projects/delucas-deli.png",
+  },
 ];
