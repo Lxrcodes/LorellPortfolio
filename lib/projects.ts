@@ -67,7 +67,7 @@ export const projects: Project[] = [
     description:
       "Delivered as a 23-page report with prioritised recommendations, a full redesign brief, and partial implementation. The kind of work that turns 'our website doesn't convert' into a clear roadmap.",
     tags: ["UX audit", "SEO", "Redesign brief", "Implementation"],
-    url: "https://asksecurity.netlify.app/",
+    url: "https://asksecurity.co.uk/",
     image: "/images/projects/ask-security.png",
   },
   {
