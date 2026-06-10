@@ -7,17 +7,21 @@ export default function Cursor() {
   const ringRef = useRef<HTMLDivElement>(null);
   const mousePos = useRef({ x: 0, y: 0 });
   const ringPos = useRef({ x: 0, y: 0 });
-  const [isTouch, setIsTouch] = useState(true); // default true avoids flash
+  // false until we confirm a fine pointer (mouse/trackpad) — prevents flash on mobile
+  const [hasMouse, setHasMouse] = useState(false);
+  // hidden until first mousemove so the dot doesn't sit at (0,0) on load
+  const [hasMoved, setHasMoved] = useState(false);
 
   useEffect(() => {
-    // Only show custom cursor on devices with a precise pointer (mouse/trackpad)
-    setIsTouch(window.matchMedia("(pointer: coarse)").matches);
+    // pointer:fine = mouse or stylus; pointer:coarse = finger touch
+    setHasMouse(window.matchMedia("(pointer: fine)").matches);
   }, []);
 
   useEffect(() => {
-    if (isTouch) return;
+    if (!hasMouse) return;
 
     const handleMouseMove = (e: MouseEvent) => {
+      if (!hasMoved) setHasMoved(true);
       mousePos.current = { x: e.clientX, y: e.clientY };
       if (dotRef.current) {
         dotRef.current.style.transform = `translate(${e.clientX - 5}px, ${e.clientY - 5}px)`;
@@ -41,21 +45,22 @@ export default function Cursor() {
       window.removeEventListener("mousemove", handleMouseMove);
       cancelAnimationFrame(animationId);
     };
-  }, [isTouch]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasMouse]);
 
-  if (isTouch) return null;
+  if (!hasMouse) return null;
 
   return (
     <>
       <div
         ref={dotRef}
-        className="fixed top-0 left-0 w-[10px] h-[10px] bg-coral rounded-full pointer-events-none z-[10000]"
-        style={{ willChange: "transform" }}
+        className="fixed top-0 left-0 w-[10px] h-[10px] bg-coral rounded-full pointer-events-none z-[10000] transition-opacity duration-200"
+        style={{ willChange: "transform", opacity: hasMoved ? 1 : 0 }}
       />
       <div
         ref={ringRef}
-        className="fixed top-0 left-0 w-[36px] h-[36px] border border-coral rounded-full pointer-events-none z-[10000] opacity-50"
-        style={{ willChange: "transform" }}
+        className="fixed top-0 left-0 w-[36px] h-[36px] border border-coral rounded-full pointer-events-none z-[10000] transition-opacity duration-200"
+        style={{ willChange: "transform", opacity: hasMoved ? 0.5 : 0 }}
       />
     </>
   );
