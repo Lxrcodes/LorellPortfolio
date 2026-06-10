@@ -180,11 +180,10 @@ export default function ThreeBackground() {
       const attach = () =>
         window.addEventListener("deviceorientation", onDeviceOrientation);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const DOE = DeviceOrientationEvent as any;
+      const DOE = DeviceOrientationEvent as typeof DeviceOrientationEvent & { requestPermission?: () => Promise<string> };
       if (typeof DOE.requestPermission === "function") {
         DOE.requestPermission()
-          .then((state: string) => { if (state === "granted") attach(); })
+          .then((state) => { if (state === "granted") attach(); })
           .catch(() => {});
       } else {
         attach();

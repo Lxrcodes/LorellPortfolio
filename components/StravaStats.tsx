@@ -246,7 +246,8 @@ function CyclingBestEffortCard({
       if (progressTimerRef.current) clearInterval(progressTimerRef.current);
       if (scrambleTimerRef.current) clearInterval(scrambleTimerRef.current);
     };
-  }, []); // Only run once on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally run once — efforts is static after mount
 
   return (
     <div ref={cardRef} className="bg-ink-2 border border-ink-3 p-6 opacity-0 relative overflow-hidden">
