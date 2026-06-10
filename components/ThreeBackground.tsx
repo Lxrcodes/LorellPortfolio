@@ -105,6 +105,18 @@ export default function ThreeBackground() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    // Test WebGL availability with a throwaway canvas — never pass this canvas to Three.js
+    // because a canvas can only hold one WebGL context; using it for both the test and the
+    // renderer would cause "Canvas has an existing context of a different type".
+    const testCanvas = document.createElement("canvas");
+    const glTest =
+      testCanvas.getContext("webgl") ||
+      testCanvas.getContext("experimental-webgl");
+    if (!glTest) {
+      document.body.classList.add("no-webgl");
+      return;
+    }
+
     gsap.registerPlugin(ScrollTrigger);
 
     const renderer = new THREE.WebGLRenderer({ antialias: false });
