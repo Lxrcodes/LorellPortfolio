@@ -53,45 +53,46 @@ export default function Hero() {
     return () => clearInterval(interval);
   }, [currentWordIndex]);
 
-  // Entrance animation
+  // Cinematic entrance animation
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
 
       tl.fromTo(
         tagRef.current,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.8 }
+        { opacity: 0, y: 24, filter: "blur(6px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 1.0 },
+        0.3
       )
         .fromTo(
           nameRef.current,
-          { opacity: 0, y: 60 },
-          { opacity: 1, y: 0, duration: 1 },
-          "-=0.4"
+          { opacity: 0, y: 100, scale: 0.96, filter: "blur(12px)" },
+          { opacity: 1, y: 0, scale: 1, filter: "blur(0px)", duration: 1.4 },
+          "-=0.6"
         )
         .fromTo(
           roleRef.current,
-          { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 0.6 },
-          "-=0.5"
+          { opacity: 0, y: 40, filter: "blur(8px)" },
+          { opacity: 1, y: 0, filter: "blur(0px)", duration: 1.0 },
+          "-=0.8"
         )
         .fromTo(
           subRef.current,
-          { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 0.6 },
-          "-=0.3"
+          { opacity: 0, y: 30, filter: "blur(6px)" },
+          { opacity: 1, y: 0, filter: "blur(0px)", duration: 1.0 },
+          "-=0.6"
         )
         .fromTo(
           ctaRef.current,
-          { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 0.6 },
-          "-=0.3"
+          { opacity: 0, y: 24 },
+          { opacity: 1, y: 0, duration: 0.8 },
+          "-=0.6"
         )
         .fromTo(
           scrollHintRef.current,
           { opacity: 0 },
-          { opacity: 1, duration: 0.8 },
-          "-=0.2"
+          { opacity: 1, duration: 1.0 },
+          "-=0.3"
         );
     });
 
@@ -99,7 +100,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex flex-col px-6 md:px-12">
+    <section id="hero" className="relative min-h-screen flex flex-col px-6 md:px-12">
       <div className="max-w-[1400px] mx-auto w-full flex flex-col flex-1">
         {/* Tag line */}
         <div

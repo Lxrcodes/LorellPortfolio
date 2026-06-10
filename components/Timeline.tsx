@@ -49,21 +49,41 @@ export default function Timeline() {
     gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
+      // Animate the section header
+      const headerEl = sectionRef.current?.querySelector(".section-header");
+      gsap.fromTo(
+        headerEl ?? [],
+        { opacity: 0, y: 50, filter: "blur(8px)" },
+        {
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          duration: 1.2,
+          ease: "power4.out",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 80%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+
       itemRefs.current.forEach((item, index) => {
         if (!item) return;
 
         gsap.fromTo(
           item,
-          { opacity: 0, x: -30 },
+          { opacity: 0, x: -50, filter: "blur(6px)" },
           {
             opacity: 1,
             x: 0,
-            duration: 0.6,
-            delay: index * 0.15,
-            ease: "power3.out",
+            filter: "blur(0px)",
+            duration: 1.0,
+            delay: index * 0.18,
+            ease: "power4.out",
             scrollTrigger: {
               trigger: item,
-              start: "top 85%",
+              start: "top 88%",
               toggleActions: "play none none reverse",
             },
           }
@@ -82,7 +102,7 @@ export default function Timeline() {
     >
       <div className="max-w-[640px] mx-auto">
         {/* Section header */}
-        <div className="mb-12">
+        <div className="section-header mb-12 opacity-0">
           <div className="font-mono text-sm text-muted mb-4">
             03 — Experience
           </div>

@@ -28,16 +28,18 @@ export default function ProjectCard({
     const ctx = gsap.context(() => {
       gsap.fromTo(
         cardRef.current,
-        { opacity: 0, y: 40 },
+        { opacity: 0, y: 70, scale: 0.95, filter: "blur(8px)" },
         {
           opacity: 1,
           y: 0,
-          duration: 0.8,
-          delay: delay * 0.1,
-          ease: "power3.out",
+          scale: 1,
+          filter: "blur(0px)",
+          duration: 1.1,
+          delay: delay * 0.12,
+          ease: "power4.out",
           scrollTrigger: {
             trigger: cardRef.current,
-            start: "top 85%",
+            start: "top 88%",
             toggleActions: "play none none reverse",
           },
         }

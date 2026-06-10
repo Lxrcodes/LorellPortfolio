@@ -16,35 +16,38 @@ export default function AboutSection() {
     gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
+      const trigger = {
+        trigger: sectionRef.current,
+        start: "top 75%",
+        toggleActions: "play none none reverse",
+      };
+
       gsap.fromTo(
         photoRef.current,
-        { opacity: 0, x: -40 },
+        { opacity: 0, x: -60, scale: 0.96, filter: "blur(10px)" },
         {
           opacity: 1,
           x: 0,
-          duration: 0.9,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 80%",
-            toggleActions: "play none none reverse",
-          },
+          scale: 1,
+          filter: "blur(0px)",
+          duration: 1.3,
+          ease: "power4.out",
+          scrollTrigger: trigger,
         }
       );
 
       gsap.fromTo(
         textRef.current,
-        { opacity: 0, x: 40 },
+        { opacity: 0, x: 60, scale: 0.97, filter: "blur(10px)" },
         {
           opacity: 1,
           x: 0,
-          duration: 0.9,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 80%",
-            toggleActions: "play none none reverse",
-          },
+          scale: 1,
+          filter: "blur(0px)",
+          duration: 1.3,
+          delay: 0.1,
+          ease: "power4.out",
+          scrollTrigger: trigger,
         }
       );
     });

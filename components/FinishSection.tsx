@@ -18,7 +18,7 @@ export default function FinishSection() {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top 60%",
+          start: "top 65%",
           toggleActions: "play none none reverse",
         },
       });
@@ -26,18 +26,19 @@ export default function FinishSection() {
       tl.fromTo(
         tapeRef.current,
         { scaleX: 0 },
-        { scaleX: 1, duration: 0.8, ease: "power3.out" }
+        { scaleX: 1, duration: 1.0, ease: "power4.out" }
       ).fromTo(
         contentRef.current?.children || [],
-        { opacity: 0, y: 30 },
+        { opacity: 0, y: 60, filter: "blur(10px)" },
         {
           opacity: 1,
           y: 0,
-          duration: 0.6,
-          stagger: 0.1,
-          ease: "power3.out",
+          filter: "blur(0px)",
+          duration: 1.1,
+          stagger: 0.12,
+          ease: "power4.out",
         },
-        "-=0.4"
+        "-=0.5"
       );
     });
 

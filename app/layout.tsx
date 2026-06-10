@@ -3,6 +3,7 @@ import { Bebas_Neue, DM_Mono, DM_Sans } from "next/font/google";
 import "./globals.css";
 import Cursor from "@/components/Cursor";
 import Nav from "@/components/Nav";
+import LenisProvider from "@/components/LenisProvider";
 
 const bebasNeue = Bebas_Neue({
   weight: "400",
@@ -58,9 +59,11 @@ export default function RootLayout({
       className={`${bebasNeue.variable} ${dmMono.variable} ${dmSans.variable}`}
     >
       <body className="font-body antialiased">
-        <Cursor />
-        <Nav />
-        {children}
+        <LenisProvider>
+          <Cursor />
+          <Nav />
+          {children}
+        </LenisProvider>
       </body>
     </html>
   );
