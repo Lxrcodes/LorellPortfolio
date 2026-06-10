@@ -78,6 +78,26 @@ body::after {
   }
 }
 
+/* CSS fallback when WebGL is unavailable (e.g. iOS Low Power Mode) */
+@keyframes paint-drift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+body.no-webgl {
+  background: linear-gradient(
+    135deg,
+    #0e0d0b 0%,
+    #11100c 25%,
+    #0c0d11 50%,
+    #110e0d 75%,
+    #0e0d0b 100%
+  );
+  background-size: 400% 400%;
+  animation: paint-drift 12s ease infinite;
+}
+
 /* Animation keyframes */
 @keyframes pulse-ring {
   0% {

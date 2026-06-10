@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -102,21 +102,27 @@ const SECTION_COLORS: Record<string, [number, number, number]> = {
 };
 
 export default function ThreeBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    const canvas = canvasRef.current;
+    if (!canvas || typeof window === "undefined") return;
+
+    // WebGL availability check — fails on Low Power Mode (iOS) and some browsers
+    const testCtx =
+      canvas.getContext("webgl") ?? canvas.getContext("experimental-webgl");
+    if (!testCtx) {
+      // CSS fallback is handled via the canvas element being hidden and the
+      // ::before pseudo-element on body providing the animated gradient
+      document.body.classList.add("no-webgl");
+      return;
+    }
 
     gsap.registerPlugin(ScrollTrigger);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: false });
+    const renderer = new THREE.WebGLRenderer({ antialias: false, canvas });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.setSize(window.innerWidth, window.innerHeight);
-
-    // Append the canvas directly to <body> with explicit inline styles so
-    // no React wrapper div, Tailwind class, or stacking context can interfere.
-    const canvas = renderer.domElement;
-    canvas.style.cssText =
-      "position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;";
-    document.body.appendChild(canvas);
 
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -202,9 +208,6 @@ export default function ThreeBackground() {
     // ── Resize ───────────────────────────────────────────────────────────────
     const onResize = () => {
       renderer.setSize(window.innerWidth, window.innerHeight);
-      // Keep inline styles in sync — Three.js sets px values; override to vw/vh
-      canvas.style.width  = "100vw";
-      canvas.style.height = "100vh";
       material.uniforms.uAspect.value = window.innerWidth / window.innerHeight;
     };
 
@@ -262,12 +265,21 @@ export default function ThreeBackground() {
       renderer.dispose();
       geometry.dispose();
       material.dispose();
-      if (document.body.contains(canvas)) {
-        document.body.removeChild(canvas);
-      }
     };
   }, []);
 
-  // Canvas is managed imperatively — no React DOM node needed
-  return null;
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: "fixed",
+        inset: 0,
+        width: "100vw",
+        height: "100vh",
+        zIndex: 0,
+        pointerEvents: "none",
+        display: "block",
+      }}
+    />
+  );
 }
