@@ -4,6 +4,7 @@ import "./globals.css";
 import Cursor from "@/components/Cursor";
 import Nav from "@/components/Nav";
 import LenisProvider from "@/components/LenisProvider";
+import ThreeBackground from "@/components/ThreeBackground";
 
 const bebasNeue = Bebas_Neue({
   weight: "400",
@@ -60,6 +61,7 @@ export default function RootLayout({
     >
       <body className="font-body antialiased">
         <LenisProvider>
+          <ThreeBackground />
           <Cursor />
           <Nav />
           {children}
