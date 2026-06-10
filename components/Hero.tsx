@@ -123,7 +123,7 @@ export default function Hero() {
           {/* Kinetic word */}
           <div
             ref={roleRef}
-            className="font-display text-4xl md:text-6xl text-sand mb-8 opacity-0"
+            className="font-display text-3xl sm:text-4xl md:text-6xl text-sand mb-8 opacity-0"
           >
             I am a{" "}
             <span

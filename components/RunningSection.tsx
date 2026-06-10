@@ -59,7 +59,7 @@ export default function RunningSection() {
         {/* Section header */}
         <div ref={headerRef} className="mb-12">
           <div className="font-mono text-sm text-muted mb-4 opacity-0">02 — The runner</div>
-          <h2 className="font-display text-5xl md:text-7xl text-sand mb-6 opacity-0">42.2KM OF PROOF</h2>
+          <h2 className="font-display text-4xl sm:text-5xl md:text-7xl text-sand mb-6 opacity-0">42.2KM OF PROOF</h2>
           <p className="font-body text-lg text-muted max-w-[700px] leading-relaxed opacity-0">
             I&apos;ve ran 3 Marathons with a 3:40 PB. I bring those same traits that carry me through 26 miles of pain into every project. No exceptions.
           </p>

@@ -75,7 +75,7 @@ export default function FinishSection() {
         </div>
 
         {/* Heading */}
-        <h2 className="font-display text-6xl md:text-8xl text-sand mb-8 opacity-0">
+        <h2 className="font-display text-5xl sm:text-6xl md:text-8xl text-sand mb-8 opacity-0">
           LET&apos;S BUILD SOMETHING.
         </h2>
 

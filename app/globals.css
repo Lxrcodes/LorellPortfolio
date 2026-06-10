@@ -14,8 +14,11 @@
   --green: #1D9E75;
 }
 
-* {
-  cursor: none;
+/* Only hide the native cursor when a mouse/trackpad is present */
+@media (pointer: fine) {
+  * {
+    cursor: none;
+  }
 }
 
 html {

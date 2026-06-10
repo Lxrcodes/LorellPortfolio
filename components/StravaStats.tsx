@@ -344,7 +344,7 @@ export default function StravaStats({
             </div>
           </div>
           {/* Card skeletons */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="bg-ink-2 border border-ink-3 p-6">
                 <div className="h-3 bg-ink-3 rounded w-24 mb-4 animate-pulse" />
@@ -376,7 +376,7 @@ export default function StravaStats({
         </div>
 
         {/* Stats grid */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <StatCard
             label="Total distance"
             value={error ? "—" : totalKm ?? 0}

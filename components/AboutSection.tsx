@@ -106,7 +106,7 @@ export default function AboutSection() {
             </div>
 
             {/* Highlights */}
-            <div className="grid grid-cols-3 gap-4 mt-10 pt-10 border-t border-ink-3">
+            <div className="grid grid-cols-3 gap-2 md:gap-4 mt-10 pt-10 border-t border-ink-3">
               <div>
                 <div className="font-display text-3xl text-coral">3</div>
                 <div className="font-mono text-xs text-muted mt-1">Marathons run</div>

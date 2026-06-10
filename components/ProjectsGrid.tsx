@@ -47,7 +47,7 @@ export default function ProjectsGrid() {
         {/* Section header */}
         <div ref={headerRef} className="mb-16">
           <div className="font-mono text-sm text-muted mb-4 opacity-0">01 — The work</div>
-          <h2 className="font-display text-5xl md:text-7xl text-sand mb-6 opacity-0">BUILT TO LAST</h2>
+          <h2 className="font-display text-4xl sm:text-5xl md:text-7xl text-sand mb-6 opacity-0">BUILT TO LAST</h2>
           <p className="font-body text-lg text-muted max-w-[700px] leading-relaxed opacity-0">
             From co-founding a B2B marketplace to e-commerce builds, brand identities and enterprise audits — every project gets the same obsessive attention I give to race day. No half-measures.
           </p>
