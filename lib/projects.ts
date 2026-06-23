@@ -15,12 +15,12 @@ export const projects: Project[] = [
   {
     id: "tipperconnect",
     name: "TipperConnect",
-    role: "Co-Founder · 2025–present",
+    role: "Developer · 2025–present",
     headline:
       "The UK's first two-sided marketplace for construction waste haulage.",
     description:
-      "Site managers book licensed tipper trucks. Quarries and contractors manage jobs and fleets. Built with Stripe Connect for split payments, the DEFRA Digital Waste Tracking API for compliance, and a founder-led go-to-market from cold call to signed contract.",
-    tags: ["Co-Founder", "Next.js", "Stripe Connect", "DEFRA API", "B2B Marketplace"],
+      "Site managers book licensed tipper trucks. Quarries and contractors manage jobs and fleets. Built with Stripe Connect for split payments and the DEFRA Digital Waste Tracking API for compliance.",
+    tags: ["Next.js", "Stripe Connect", "DEFRA API", "B2B Marketplace"],
     url: "https://tipperconnect.co.uk/",
     featured: true,
     image: "/images/projects/tipperconnect.png",

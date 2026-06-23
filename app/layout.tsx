@@ -28,23 +28,22 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Lorell — Developer, Founder, Runner",
+  title: "Lorell — Developer, Builder, Runner",
   description:
-    "London-based freelance web developer, startup founder, and marathon runner. I build things that go the distance.",
+    "London-based freelance web developer and marathon runner. I build things that go the distance.",
   keywords: [
     "web developer",
     "freelance",
     "London",
-    "startup founder",
     "Next.js",
     "React",
     "full-stack",
   ],
   authors: [{ name: "Lorell" }],
   openGraph: {
-    title: "Lorell — Developer, Founder, Runner",
+    title: "Lorell — Developer, Builder, Runner",
     description:
-      "London-based freelance web developer, startup founder, and marathon runner. I build things that go the distance.",
+      "London-based freelance web developer and marathon runner. I build things that go the distance.",
     type: "website",
   },
 };

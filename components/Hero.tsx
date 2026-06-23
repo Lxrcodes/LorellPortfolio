@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 
-const WORDS = ["Developer", "Founder", "Runner", "Builder", "Maker"];
+const WORDS = ["Developer", "Builder", "Runner", "Maker"];
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 export default function Hero() {
@@ -139,8 +139,8 @@ export default function Hero() {
             className="font-body text-lg md:text-xl text-muted max-w-2xl mb-12 opacity-0"
           >
             I build things that go the distance — for clients who need more than
-            just a developer. You get someone who&apos;s founded a startup, run
-            marathons, and shipped across the world.
+            just a developer. You get someone who&apos;s shipped real products,
+            run marathons, and delivered across the world.
           </p>
 
           {/* CTAs */}

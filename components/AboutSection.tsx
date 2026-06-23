@@ -81,21 +81,20 @@ export default function AboutSection() {
               About
             </div>
             <h2 className="font-display text-5xl md:text-6xl text-sand mb-6 leading-tight">
-              DEVELOPER.<br />FOUNDER.<br />RUNNER.
+              DEVELOPER.<br />BUILDER.<br />RUNNER.
             </h2>
             <div className="space-y-4 font-body text-muted text-lg">
               <p>
-                I&apos;m Lorell — a London-based developer and founder who builds
+                I&apos;m Lorell — a London-based developer who builds
                 digital products that actually work. From B2B marketplaces to
                 e-commerce stores, client portals to fleet management tools, I
                 take projects from idea to launch with the same relentlessness
                 I bring to marathon day.
               </p>
               <p>
-                I also co-founded TipperConnect, the UK&apos;s first two-sided
-                marketplace for construction waste haulage — handling everything
-                from developing the app to Stripe Connect integrations and
-                DEFRA compliance APIs.
+                I also built TipperConnect, the UK&apos;s first two-sided
+                marketplace for construction waste haulage — developing the app,
+                Stripe Connect integrations, and DEFRA compliance APIs.
               </p>
               <p>
                 Outside of building, I also run. Three marathons in, with a 3:40

@@ -15,10 +15,10 @@ interface TimelineItem {
 const timelineData: TimelineItem[] = [
   {
     period: "2026–Present",
-    role: "Co-Founder & CTO",
+    role: "Developer",
     company: "TipperConnect",
     description:
-      "Building the UK's first construction haulage marketplace from zero — product, tech, sales and go-to-market.",
+      "Building the UK's first construction haulage marketplace — full-stack development, Stripe Connect integrations, and DEFRA compliance APIs.",
     active: true,
   },
   {
