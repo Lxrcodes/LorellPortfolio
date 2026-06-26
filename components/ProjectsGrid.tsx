@@ -23,59 +23,101 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
-// Each item occupies 55 % of the viewport; slot (item + gap) = 60 %
-const ITEM_FRAC = 0.55;
-const SLOT_FRAC = 0.60;
-
 export default function ProjectsGrid() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const deskContainerRef = useRef<HTMLDivElement>(null);
+  const mobContainerRef = useRef<HTMLDivElement>(null);
+
   const [activeIndex, setActiveIndex] = useState(0);
+  const [mobActiveIndex, setMobActiveIndex] = useState(0);
   const [showPhone, setShowPhone] = useState(false);
-  // Pixel-based calculations require the live viewport width
   const [vpw, setVpw] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth : 1440
+  );
+  const [vph, setVph] = useState(() =>
+    typeof window !== "undefined" ? window.innerHeight : 900
   );
   const reduced = usePrefersReducedMotion();
 
   useEffect(() => {
-    const update = () => setVpw(window.innerWidth);
+    const update = () => {
+      setVpw(window.innerWidth);
+      setVph(window.innerHeight);
+    };
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
   }, []);
 
+  // ── Desktop scroll ──
   const { scrollYProgress } = useScroll({
-    target: containerRef,
+    target: deskContainerRef,
     offset: ["start start", "end end"],
   });
 
-  // Coral progress bar
+  // ── Mobile scroll ──
+  const { scrollYProgress: mobScrollYProgress } = useScroll({
+    target: mobContainerRef,
+    offset: ["start start", "end end"],
+  });
+
   const progressWidth = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+  const mobProgressWidth = useTransform(mobScrollYProgress, [0, 1], ["0%", "100%"]);
 
-  // Track translation: centres item[activeIndex] horizontally in the viewport
-  const itemW = vpw * ITEM_FRAC;
-  const slotW = vpw * SLOT_FRAC;
-  const startX = vpw / 2 - itemW / 2;          // centres item 0
-  const endX   = startX - (projects.length - 1) * slotW; // centres last item
+  // ── Desktop horizontal track (adapts to phone/desktop toggle) ──
+  const deskItemFrac = showPhone ? 0.35 : 0.55;
+  const deskSlotFrac = showPhone ? 0.40 : 0.60;
+  const itemW = vpw * deskItemFrac;
+  const slotW = vpw * deskSlotFrac;
 
-  const rawTrackX = useTransform(scrollYProgress, [0, 1], [startX, endX]);
-  // Spring adds physical momentum; bypassed when reduced-motion is on
+  // Refs let the callback transform pick up new fracs without re-creating the hook
+  const startXRef = useRef(0);
+  const endXRef = useRef(0);
+  startXRef.current = vpw / 2 - itemW / 2;
+  endXRef.current = startXRef.current - (projects.length - 1) * slotW;
+
+  const rawTrackX = useTransform(scrollYProgress, (v) => {
+    if (isNaN(v)) return startXRef.current;
+    return startXRef.current + (endXRef.current - startXRef.current) * v;
+  });
   const springTrackX = useSpring(rawTrackX, { stiffness: 120, damping: 25, mass: 0.8 });
   const trackX = reduced ? rawTrackX : springTrackX;
 
-  // Discrete active-project index derived from scroll
+  // Math.round(v * (N-1)) fires at the visual centre of each slot, not at its edge
   useEffect(() => {
     return scrollYProgress.on("change", (v: number) => {
       if (isNaN(v)) return;
       setActiveIndex(
-        Math.max(0, Math.min(Math.floor(v * projects.length), projects.length - 1))
+        Math.max(0, Math.min(Math.round(v * (projects.length - 1)), projects.length - 1))
       );
     });
   }, [scrollYProgress]);
 
+  // ── Mobile vertical track ──
+  const mobSlotH = vph * 0.5;
+  const mobItemW = vpw * (showPhone ? 0.65 : 0.85);
+
+  const mobEndYRef = useRef(0);
+  mobEndYRef.current = -(projects.length - 1) * mobSlotH;
+
+  const rawMobTrackY = useTransform(mobScrollYProgress, (v) => {
+    if (isNaN(v)) return 0;
+    return mobEndYRef.current * v;
+  });
+  const springMobTrackY = useSpring(rawMobTrackY, { stiffness: 120, damping: 25, mass: 0.8 });
+  const mobTrackY = reduced ? rawMobTrackY : springMobTrackY;
+
+  useEffect(() => {
+    return mobScrollYProgress.on("change", (v: number) => {
+      if (isNaN(v)) return;
+      setMobActiveIndex(
+        Math.max(0, Math.min(Math.round(v * (projects.length - 1)), projects.length - 1))
+      );
+    });
+  }, [mobScrollYProgress]);
+
   const active = projects[activeIndex];
+  const mobActive = projects[mobActiveIndex];
   const dur = reduced ? 0 : 0.4;
 
-  // Toggle buttons — rendered on both desktop and mobile
   const DeviceToggle = ({ className = "" }: { className?: string }) => (
     <div className={`flex gap-1.5 ${className}`}>
       {(["Desktop", "Mobile"] as const).map((label) => {
@@ -117,22 +159,20 @@ export default function ProjectsGrid() {
           DESKTOP — horizontal sliding track
       ══════════════════════════════════════════ */}
       <div
-        ref={containerRef}
+        ref={deskContainerRef}
         className="hidden md:block"
         style={{ height: `${projects.length * 100}vh` }}
       >
         <div className="sticky top-0 h-screen flex flex-col overflow-hidden">
 
-          {/* Track — top 55 % of sticky viewport */}
+          {/* Track — top 55% of sticky viewport */}
           <div className="relative flex-none h-[55%] overflow-hidden">
 
-            {/* Scroll progress bar */}
             <motion.div
               style={{ width: progressWidth }}
               className="absolute top-0 left-0 h-[2px] bg-coral z-10"
             />
 
-            {/* The sliding track: all mockups in a row, translated horizontally */}
             <motion.div
               style={{ x: trackX, gap: `${slotW - itemW}px` }}
               className="absolute inset-y-0 left-0 flex items-center"
@@ -161,7 +201,7 @@ export default function ProjectsGrid() {
                         fill
                         className="object-contain drop-shadow-2xl"
                         priority={i === 0}
-                        sizes="60vw"
+                        sizes={showPhone ? "35vw" : "55vw"}
                       />
                     </div>
                   </motion.div>
@@ -169,7 +209,7 @@ export default function ProjectsGrid() {
               })}
             </motion.div>
 
-            {/* Odometer counter — bottom-left of track panel */}
+            {/* Odometer counter */}
             <div className="absolute bottom-4 left-6 z-10 flex items-center gap-2 font-mono text-sm text-muted">
               <div className="relative h-5 w-7 overflow-hidden">
                 <AnimatePresence initial={false}>
@@ -189,10 +229,9 @@ export default function ProjectsGrid() {
               <span>{String(projects.length).padStart(2, "0")}</span>
             </div>
 
-            {/* Device toggle — bottom-right of track panel */}
             <DeviceToggle className="absolute bottom-4 right-6 z-10" />
 
-            {/* Progress dots — right-centre of track panel */}
+            {/* Progress dots */}
             <div className="absolute top-1/2 -translate-y-1/2 right-6 flex flex-col gap-2 z-10">
               {projects.map((_, i) => (
                 <div
@@ -205,7 +244,7 @@ export default function ProjectsGrid() {
             </div>
           </div>
 
-          {/* Info panel — bottom 45 % of sticky viewport */}
+          {/* Info panel — bottom 45% */}
           <div className="relative flex-none h-[45%] border-t border-ink-3/40">
             <AnimatePresence>
               <motion.div
@@ -256,60 +295,137 @@ export default function ProjectsGrid() {
       </div>
 
       {/* ══════════════════════════════════════════
-          MOBILE — stacked project cards
+          MOBILE — vertical sliding track
       ══════════════════════════════════════════ */}
-      <div className="md:hidden">
-        <div className="flex gap-2 px-6 mb-10">
-          <DeviceToggle />
-        </div>
+      <div
+        ref={mobContainerRef}
+        className="md:hidden"
+        style={{ height: `${projects.length * 100}vh` }}
+      >
+        <div className="sticky top-0 h-screen flex flex-col overflow-hidden">
 
-        <div className="px-6 space-y-20">
-          {projects.map((p) => {
-            const src = showPhone
-              ? (p.phoneImage ?? p.macbookImage ?? "")
-              : (p.macbookImage ?? "");
-            return (
+          {/* Mockup area — top 50% */}
+          <div className="relative flex-none h-[50%] overflow-hidden">
+
+            <motion.div
+              style={{ width: mobProgressWidth }}
+              className="absolute top-0 left-0 h-[2px] bg-coral z-10"
+            />
+
+            {/* Progress dots — horizontal row at top */}
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 flex flex-row gap-2 z-10">
+              {projects.map((_, i) => (
+                <div
+                  key={i}
+                  className={`rounded-full transition-all duration-300 ${
+                    i === mobActiveIndex ? "w-1.5 h-1.5 bg-coral" : "w-1 h-1 bg-ink-3"
+                  }`}
+                />
+              ))}
+            </div>
+
+            {/* Vertical sliding track */}
+            <motion.div
+              style={{ y: mobTrackY }}
+              className="absolute inset-x-0 top-0 flex flex-col"
+            >
+              {projects.map((p, i) => {
+                const dist = Math.abs(i - mobActiveIndex);
+                const src = showPhone
+                  ? (p.phoneImage ?? p.macbookImage ?? "")
+                  : (p.macbookImage ?? "");
+
+                return (
+                  <motion.div
+                    key={p.id}
+                    animate={{
+                      opacity: dist === 0 ? 1 : dist === 1 ? 0.35 : 0.15,
+                      scale:   dist === 0 ? 1 : dist === 1 ? 0.90 : 0.78,
+                    }}
+                    transition={{ duration: dur, ease: "easeOut" }}
+                    style={{ height: `${mobSlotH}px`, flexShrink: 0 }}
+                    className="flex items-center justify-center"
+                  >
+                    <div
+                      className="relative"
+                      style={{
+                        width: `${mobItemW}px`,
+                        height: `${mobSlotH * 0.86}px`,
+                      }}
+                    >
+                      <Image
+                        src={src}
+                        alt={`${p.name} ${showPhone ? "mobile" : "desktop"} mockup`}
+                        fill
+                        className="object-contain drop-shadow-2xl"
+                        priority={i === 0}
+                        sizes={showPhone ? "65vw" : "85vw"}
+                      />
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+
+            {/* Odometer */}
+            <div className="absolute bottom-3 left-4 z-10 flex items-center gap-2 font-mono text-sm text-muted">
+              <div className="relative h-5 w-7 overflow-hidden">
+                <AnimatePresence initial={false}>
+                  <motion.span
+                    key={mobActiveIndex}
+                    initial={{ y: "100%", opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: "-100%", opacity: 0 }}
+                    transition={{ duration: dur, ease: "easeOut" }}
+                    className="absolute inset-0 flex items-center"
+                  >
+                    {String(mobActiveIndex + 1).padStart(2, "0")}
+                  </motion.span>
+                </AnimatePresence>
+              </div>
+              <span className="text-ink-3">/</span>
+              <span>{String(projects.length).padStart(2, "0")}</span>
+            </div>
+
+            <DeviceToggle className="absolute bottom-3 right-4 z-10" />
+          </div>
+
+          {/* Info panel — bottom 50% */}
+          <div className="relative flex-none h-[50%] border-t border-ink-3/40">
+            <AnimatePresence>
               <motion.div
-                key={p.id}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: reduced ? 0 : 0.6, ease: "easeOut" }}
-                viewport={{ once: true, margin: "-80px" }}
+                key={mobActiveIndex}
+                initial={{ opacity: 0, y: reduced ? 0 : 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: reduced ? 0 : -12 }}
+                transition={{ duration: dur, ease: "easeInOut" }}
+                className="absolute inset-0 flex flex-col justify-center overflow-hidden px-6 py-6"
               >
-                <div className="relative aspect-video mb-6 bg-ink-2 overflow-hidden">
-                  <Image
-                    src={src}
-                    alt={`${p.name} mockup`}
-                    fill
-                    className="object-contain p-4"
-                    sizes="100vw"
-                  />
-                </div>
                 <div className="font-mono text-xs text-muted mb-2 uppercase tracking-widest">
-                  {p.role}
+                  {mobActive.role}
                 </div>
-                <h3 className="font-display text-4xl text-sand mb-3 leading-none uppercase">
-                  {p.name}
+                <h3 className="font-display text-3xl text-sand mb-2 leading-none uppercase">
+                  {mobActive.name}
                 </h3>
-                <p className="font-body text-base text-coral mb-2 leading-snug">
-                  {p.headline}
+                <p className="font-body text-sm text-coral mb-2 leading-snug">
+                  {mobActive.headline}
                 </p>
-                <p className="font-body text-sm text-muted mb-4 leading-relaxed">
-                  {p.description}
+                <p className="font-body text-xs text-muted mb-3 leading-relaxed line-clamp-2">
+                  {mobActive.description}
                 </p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {p.tags.map((tag) => (
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  {mobActive.tags.slice(0, 3).map((tag) => (
                     <span
                       key={tag}
-                      className="font-mono text-xs px-2.5 py-1 bg-ink-2 border border-ink-3 text-muted"
+                      className="font-mono text-xs px-2 py-0.5 bg-ink-2 border border-ink-3 text-muted"
                     >
                       {tag}
                     </span>
                   ))}
                 </div>
-                {p.url && (
+                {mobActive.url && (
                   <a
-                    href={p.url}
+                    href={mobActive.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 font-mono text-sm text-coral hover:text-coral-lt transition-colors"
@@ -318,12 +434,13 @@ export default function ProjectsGrid() {
                   </a>
                 )}
               </motion.div>
-            );
-          })}
+            </AnimatePresence>
+          </div>
+
         </div>
       </div>
 
-      {/* Route canvas fade-out: dissolves fixed canvas before the running section */}
+      {/* Route canvas fade-out */}
       <div
         aria-hidden
         className="pointer-events-none absolute bottom-0 left-0 right-0 h-48"
