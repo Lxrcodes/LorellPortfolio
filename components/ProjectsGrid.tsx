@@ -55,7 +55,7 @@ export default function ProjectsGrid() {
     : (active.macbookImage ?? "");
 
   return (
-    <section id="work" className="py-24">
+    <section id="work" className="py-24 relative">
       {/* Section header */}
       <div className="px-6 md:px-12 mb-16 max-w-[1400px] mx-auto">
         <div className="font-mono text-sm text-muted mb-4">01 — The work</div>
@@ -94,7 +94,7 @@ export default function ProjectsGrid() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: dur, ease: "easeInOut" }}
-                className="absolute inset-0 flex items-center justify-center p-8 md:p-14 lg:p-20"
+                className="absolute inset-0 flex items-center justify-center p-12 md:p-16 lg:p-24"
               >
                 <div className="relative w-full h-full">
                   <Image
@@ -109,10 +109,24 @@ export default function ProjectsGrid() {
               </motion.div>
             </AnimatePresence>
 
-            {/* Project counter */}
-            <div className="absolute bottom-5 left-5 font-mono text-xs text-muted z-10">
-              {String(activeIndex + 1).padStart(2, "0")} /{" "}
-              {String(projects.length).padStart(2, "0")}
+            {/* Project counter — odometer style */}
+            <div className="absolute bottom-5 left-5 z-10 flex items-center gap-2 font-mono text-sm text-muted">
+              <div className="relative h-5 w-7 overflow-hidden">
+                <AnimatePresence initial={false}>
+                  <motion.span
+                    key={activeIndex}
+                    initial={{ y: "100%", opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: "-100%", opacity: 0 }}
+                    transition={{ duration: dur, ease: "easeOut" }}
+                    className="absolute inset-0 flex items-center"
+                  >
+                    {String(activeIndex + 1).padStart(2, "0")}
+                  </motion.span>
+                </AnimatePresence>
+              </div>
+              <span className="text-ink-3">/</span>
+              <span>{String(projects.length).padStart(2, "0")}</span>
             </div>
 
             {/* Desktop / Mobile view toggle */}
@@ -161,12 +175,12 @@ export default function ProjectsGrid() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: reduced ? 0 : -14 }}
                 transition={{ duration: dur, ease: "easeInOut" }}
-                className="absolute inset-0 flex flex-col justify-center px-8 md:px-12 lg:px-14 pr-14"
+                className="absolute inset-0 flex flex-col justify-center overflow-hidden px-8 md:px-12 lg:px-14 pr-14"
               >
                 <div className="font-mono text-xs text-muted mb-3 uppercase tracking-widest">
                   {active.role}
                 </div>
-                <h3 className="font-display text-4xl md:text-5xl lg:text-6xl text-sand mb-4 leading-none">
+                <h3 className="font-display text-4xl md:text-5xl lg:text-6xl text-sand mb-4 leading-none uppercase">
                   {active.name}
                 </h3>
                 <p className="font-body text-base md:text-lg text-coral mb-3 leading-snug">
@@ -201,6 +215,13 @@ export default function ProjectsGrid() {
 
         </div>
       </div>
+
+      {/* Route canvas fade-out: gradient overlay that dissolves the fixed canvas before the running section */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute bottom-0 left-0 right-0 h-48"
+        style={{ background: "linear-gradient(to bottom, transparent, #0E0D0B)" }}
+      />
     </section>
   );
 }

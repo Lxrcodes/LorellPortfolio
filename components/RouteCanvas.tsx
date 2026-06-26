@@ -270,7 +270,7 @@ export default function RouteCanvas() {
       ctx.globalAlpha = opacityRef.current;
 
       const progress = progressRef.current;
-      const panY = progress; // panY equals progress - scroll down = route travels down
+      const panY = progress * 0.6; // 60% of scroll speed — separate depth plane behind content
 
       // Update pulse animation
       pulseRef.current = (pulseRef.current + 0.02) % 1;
