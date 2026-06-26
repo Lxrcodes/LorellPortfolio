@@ -71,8 +71,10 @@ export default function ProjectsGrid() {
   // Refs let the callback transform pick up new fracs without re-creating the hook
   const startXRef = useRef(0);
   const endXRef = useRef(0);
+  const slotWRef = useRef(slotW);
   startXRef.current = vpw / 2 - itemW / 2;
   endXRef.current = startXRef.current - (projects.length - 1) * slotW;
+  slotWRef.current = slotW;
 
   const rawTrackX = useTransform(scrollYProgress, (v) => {
     if (isNaN(v)) return startXRef.current;
@@ -81,22 +83,25 @@ export default function ProjectsGrid() {
   const springTrackX = useSpring(rawTrackX, { stiffness: 120, damping: 25, mass: 0.8 });
   const trackX = reduced ? rawTrackX : springTrackX;
 
-  // Math.round(v * (N-1)) fires at the visual centre of each slot, not at its edge
+  // Derive active index from the visual (spring) position so highlight fires at true centre
   useEffect(() => {
-    return scrollYProgress.on("change", (v: number) => {
-      if (isNaN(v)) return;
-      setActiveIndex(
-        Math.max(0, Math.min(Math.round(v * (projects.length - 1)), projects.length - 1))
-      );
+    return trackX.on("change", (x: number) => {
+      if (isNaN(x)) return;
+      const s = slotWRef.current;
+      if (s === 0) return;
+      const raw = (startXRef.current - x) / s;
+      setActiveIndex(Math.max(0, Math.min(Math.round(raw), projects.length - 1)));
     });
-  }, [scrollYProgress]);
+  }, [trackX]);
 
   // ── Mobile vertical track ──
   const mobSlotH = vph * 0.5;
   const mobItemW = vpw * (showPhone ? 0.65 : 0.85);
 
   const mobEndYRef = useRef(0);
+  const mobSlotHRef = useRef(mobSlotH);
   mobEndYRef.current = -(projects.length - 1) * mobSlotH;
+  mobSlotHRef.current = mobSlotH;
 
   const rawMobTrackY = useTransform(mobScrollYProgress, (v) => {
     if (isNaN(v)) return 0;
@@ -106,13 +111,14 @@ export default function ProjectsGrid() {
   const mobTrackY = reduced ? rawMobTrackY : springMobTrackY;
 
   useEffect(() => {
-    return mobScrollYProgress.on("change", (v: number) => {
-      if (isNaN(v)) return;
-      setMobActiveIndex(
-        Math.max(0, Math.min(Math.round(v * (projects.length - 1)), projects.length - 1))
-      );
+    return mobTrackY.on("change", (y: number) => {
+      if (isNaN(y)) return;
+      const h = mobSlotHRef.current;
+      if (h === 0) return;
+      const raw = -y / h;
+      setMobActiveIndex(Math.max(0, Math.min(Math.round(raw), projects.length - 1)));
     });
-  }, [mobScrollYProgress]);
+  }, [mobTrackY]);
 
   const active = projects[activeIndex];
   const mobActive = projects[mobActiveIndex];
